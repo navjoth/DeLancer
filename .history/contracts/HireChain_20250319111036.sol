@@ -41,9 +41,8 @@ contract HireChain {
     event ProjectApplied(uint256 id, address freelancer, uint256 bidAmount);
     event FreelancerAssigned(uint256 id, address freelancer, uint256 proposedFee);
     event FundsDeposited(uint id, uint256 bidAmount);
-    event FundsReleased(uint id, address freelancer, uint256 bidAmount, bool success);
+    event FundsReleased(uint id, address freelancer, uint256 bidAmount);
     event ReputationAwarded(address freelancer, uint256 amount);
-    event TransferFailed(uint id, string reason);
 
     constructor(address _reputationTokenAddress) {
         reputationToken = IReputationToken(_reputationTokenAddress);
@@ -58,7 +57,6 @@ contract HireChain {
     function depositFunds(uint _projectId) public payable {
         Project storage project = projects[_projectId];
         require(msg.sender == project.employer, "Only employer can deposit funds");
-        require(project.bidAmount > 0, "Bid amount must be set");
         require(msg.value == project.bidAmount, "Deposit must match the project amount");
         emit FundsDeposited(_projectId, msg.value);
     }

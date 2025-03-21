@@ -23,17 +23,15 @@
                 <button id="fetchProjectsBtn">Fetch Projects</button>
                 <button id="createProjectBtn">Create Project</button>
                 <button id="applyProjectBtn">Apply for Project</button>
-                <button id="assignFreelancerBtn">Assign Freelancer</button>
-                <button id="depositFundsBtn">Deposit Funds</button>
                 <button id="completeProjectBtn">Complete Project</button>
-                <button id="releaseFundsBtn">Release Funds</button>
+                <button id="assignFreelancerBtn">Assign Freelancer</button>
             </div>
         </section>
 
         <!-- Display Sections -->
         <section class="display-section">
             <h2>Available Projects</h2>
-            <table>
+            <table id="projectTable">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -41,12 +39,12 @@
                         <th>Description</th>
                         <th>Employer</th>
                         <th>Freelancer</th>
-                        <th>Bid Amount (ETH)</th>
+                        <th>Bid Amount</th>
                         <th>Completed</th>
-                        <th>Applicants</th>
+                        <th>Bids</th> <!-- New column for number of bids -->
                     </tr>
                 </thead>
-                <tbody id="projectTable"></tbody>
+                <tbody></tbody> <!-- Body will be populated dynamically by app.js -->
             </table>
         </section>
 
@@ -63,10 +61,12 @@
             <input type="text" id="cidInput" placeholder="Enter CID" />
             <button id="fetchButton">Fetch from IPFS</button>
         </section>
+
+        
     </main>
 
     <footer>
-        <p>© 2024 DeLancer | Built for Transparency and Trust</p>
+        <p>&copy; 2024 DeLancer | Built for Transparency and Trust</p>
     </footer>
 
     <script src="js/app.js"></script>

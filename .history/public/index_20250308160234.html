@@ -23,31 +23,14 @@
                 <button id="fetchProjectsBtn">Fetch Projects</button>
                 <button id="createProjectBtn">Create Project</button>
                 <button id="applyProjectBtn">Apply for Project</button>
-                <button id="assignFreelancerBtn">Assign Freelancer</button>
-                <button id="depositFundsBtn">Deposit Funds</button>
                 <button id="completeProjectBtn">Complete Project</button>
-                <button id="releaseFundsBtn">Release Funds</button>
             </div>
         </section>
 
         <!-- Display Sections -->
         <section class="display-section">
             <h2>Available Projects</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Employer</th>
-                        <th>Freelancer</th>
-                        <th>Bid Amount (ETH)</th>
-                        <th>Completed</th>
-                        <th>Applicants</th>
-                    </tr>
-                </thead>
-                <tbody id="projectTable"></tbody>
-            </table>
+            <div id="projectTable"></div>
         </section>
 
         <!-- Freelancer Section -->
@@ -63,10 +46,12 @@
             <input type="text" id="cidInput" placeholder="Enter CID" />
             <button id="fetchButton">Fetch from IPFS</button>
         </section>
+
+        
     </main>
 
     <footer>
-        <p>© 2024 DeLancer | Built for Transparency and Trust</p>
+        <p>&copy; 2024 DeLancer | Built for Transparency and Trust</p>
     </footer>
 
     <script src="js/app.js"></script>

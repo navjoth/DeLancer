@@ -7,7 +7,7 @@ const fetchFreelancersBtn = document.getElementById('fetchFreelancersBtn');
 const freelancerTable = document.getElementById('freelancerTable');
 const assignFreelancerBtn = document.getElementById('assignFreelancerBtn');
 
-const contractAddress = '0xDD6a609Cb56aBfd0493310Fb1A452c8241E14f1E'; // Replace with the deployed HireChain address
+const contractAddress = '0x5cD2C3dB29DbFf9352863189BEDA0caC7AcDdCDC'; // Replace with the deployed HireChain address
 const contractABI = [
   {
     "inputs": [
@@ -84,12 +84,6 @@ const contractABI = [
         "internalType": "uint256",
         "name": "bidAmount",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "success",
-        "type": "bool"
       }
     ],
     "name": "FundsReleased",
@@ -199,25 +193,6 @@ const contractABI = [
       }
     ],
     "name": "ReputationAwarded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "reason",
-        "type": "string"
-      }
-    ],
-    "name": "TransferFailed",
     "type": "event"
   },
   {
@@ -359,11 +334,6 @@ const contractABI = [
     "constant": true
   },
   {
-    "stateMutability": "payable",
-    "type": "receive",
-    "payable": true
-  },
-  {
     "inputs": [
       {
         "internalType": "string",
@@ -435,19 +405,6 @@ const contractABI = [
       }
     ],
     "name": "completeProject",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_projectId",
-        "type": "uint256"
-      }
-    ],
-    "name": "releaseFunds",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -562,7 +519,7 @@ async function createProject() {
       const receipt = await contract.methods.createProject(name, description).send({ from: userAccount });
       console.log('Project Created:', receipt);
       alert('Project created successfully!');
-      fetchProjects(); // Re-enabled, should work with the updated fetchProjects
+      // fetchProjects(); // Comment out for testing
     } catch (error) {
       console.error('Error creating project:', error);
       alert('Failed to create project. Check the console for details.');
@@ -659,41 +616,22 @@ async function completeProject() {
 
 async function fetchProjects() {
   try {
-    console.log('Fetching project count...');
     const projectCount = await contract.methods.projectCount().call();
-    console.log(`Project count: ${projectCount}`);
-
     projectTable.innerHTML = '';
-    if (projectCount === 0) {
-      projectTable.innerHTML = '<tr><td colspan="8">No projects found.</td></tr>';
-      return;
-    }
 
     for (let i = 1; i <= projectCount; i++) {
-      console.log(`Fetching project ${i}...`);
       const project = await contract.methods.projects(i).call();
-      console.log(`Project ${i} details:`, project);
+      const row = document.createElement('tr');
 
       let applicantsHtml = '';
-      try {
-        const proposals = await contract.methods.feeProposals(i).call();
-        console.log(`Proposals for project ${i}:`, proposals);
-        if (proposals.length > 0) {
-          for (let j = 0; j < proposals.length; j++) {
-            const freelancer = proposals[j].freelancer;
-            const proposedFee = web3.utils.fromWei(proposals[j].proposedFee, 'ether');
-            const reputation = await contract.methods.getFreelancerReputation(freelancer).call();
-            applicantsHtml += `Freelancer: ${freelancer}, Fee: ${proposedFee} ETH, Reputation: ${web3.utils.fromWei(reputation, 'ether')} REP<br>`;
-          }
-        } else {
-          applicantsHtml = 'No applicants yet';
-        }
-      } catch (proposalError) {
-        console.error(`Error fetching proposals for project ${i}:`, proposalError);
-        applicantsHtml = 'Error fetching applicants';
+      const proposals = await contract.methods.feeProposals(i).call();
+      for (let j = 0; j < proposals.length; j++) {
+        const freelancer = proposals[j].freelancer;
+        const proposedFee = web3.utils.fromWei(proposals[j].proposedFee, 'ether');
+        const reputation = await contract.methods.getFreelancerReputation(freelancer).call();
+        applicantsHtml += `Freelancer: ${freelancer}, Fee: ${proposedFee} ETH, Reputation: ${web3.utils.fromWei(reputation, 'ether')} REP<br>`;
       }
 
-      const row = document.createElement('tr');
       row.innerHTML = `
         <td>${project.id}</td>
         <td>${project.name}</td>
@@ -702,7 +640,7 @@ async function fetchProjects() {
         <td>${project.freelancer || 'N/A'}</td>
         <td>${project.bidAmount ? web3.utils.fromWei(project.bidAmount, 'ether') : 'N/A'} ETH</td>
         <td>${project.completed ? 'Yes' : 'No'}</td>
-        <td>${applicantsHtml}</td>
+        <td>${applicantsHtml || 'No applicants yet'}</td>
       `;
       projectTable.appendChild(row);
     }
@@ -711,89 +649,6 @@ async function fetchProjects() {
     alert('Failed to fetch projects. Check the console for details.');
   }
 }
-
-async function releaseFunds() {
-  const projectId = prompt('Enter the project ID to release funds:');
-  if (!projectId || isNaN(projectId)) {
-    alert('Invalid input. Please enter a valid project ID.');
-    return;
-  }
-
-  try {
-    const project = await contract.methods.projects(projectId).call();
-    if (project.employer.toLowerCase() !== userAccount.toLowerCase()) {
-      alert('Only the employer can release funds!');
-      return;
-    }
-    if (!project.completed) {
-      alert('Project must be completed before releasing funds!');
-      return;
-    }
-    if (project.isPaid) {
-      alert('Funds have already been released for this project!');
-      return;
-    }
-
-    const receipt = await contract.methods.releaseFunds(projectId).send({ from: userAccount });
-    console.log('Funds Released:', receipt);
-    if (receipt.status) {
-      alert(`Funds released successfully for Project ID: ${projectId}`);
-    } else {
-      alert(`Funds release failed for Project ID: ${projectId}. Check console for details.`);
-    }
-    fetchProjects();
-  } catch (error) {
-    console.error('Error releasing funds:', error);
-    alert('Failed to release funds. Check the console for details.');
-  }
-}
-
-// Add event listener for the new releaseFunds button (to be added in index.html)
-const releaseFundsBtn = document.getElementById('releaseFundsBtn');
-if (releaseFundsBtn) {
-  releaseFundsBtn.addEventListener('click', releaseFunds);
-}
-
-async function depositFunds() {
-  const projectId = prompt('Enter the project ID to deposit funds:');
-  if (!projectId || isNaN(projectId)) {
-    alert('Invalid input. Please enter a valid project ID.');
-    return;
-  }
-
-  try {
-    const project = await contract.methods.projects(projectId).call();
-    if (project.employer.toLowerCase() !== userAccount.toLowerCase()) {
-      alert('Only the employer can deposit funds!');
-      return;
-    }
-    if (project.bidAmount == 0) {
-      alert('No bid amount set for this project. Assign a freelancer first.');
-      return;
-    }
-
-    const bidAmount = web3.utils.fromWei(project.bidAmount, 'ether');
-    const confirmDeposit = confirm(`Deposit ${bidAmount} ETH for Project ID: ${projectId}?`);
-    if (!confirmDeposit) return;
-
-    const receipt = await contract.methods.depositFunds(projectId).send({
-      from: userAccount,
-      value: project.bidAmount
-    });
-    console.log('Funds Deposited:', receipt);
-    alert(`Funds deposited successfully for Project ID: ${projectId}`);
-    fetchProjects();
-  } catch (error) {
-    console.error('Error depositing funds:', error);
-    alert('Failed to deposit funds. Check the console for details.');
-  }
-}
-
-const depositFundsBtn = document.getElementById('depositFundsBtn');
-if (depositFundsBtn) {
-  depositFundsBtn.addEventListener('click', depositFunds);
-}
-
 
 createProjectBtn.addEventListener('click', createProject);
 applyProjectBtn.addEventListener('click', applyForProject);

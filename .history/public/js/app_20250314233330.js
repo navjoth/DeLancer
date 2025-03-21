@@ -7,7 +7,7 @@ const fetchFreelancersBtn = document.getElementById('fetchFreelancersBtn');
 const freelancerTable = document.getElementById('freelancerTable');
 const assignFreelancerBtn = document.getElementById('assignFreelancerBtn');
 
-const contractAddress = '0xDD6a609Cb56aBfd0493310Fb1A452c8241E14f1E'; // Replace with the deployed HireChain address
+const contractAddress = '0x5cD2C3dB29DbFf9352863189BEDA0caC7AcDdCDC'; // Replace with the deployed HireChain address
 const contractABI = [
   {
     "inputs": [
@@ -84,12 +84,6 @@ const contractABI = [
         "internalType": "uint256",
         "name": "bidAmount",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "success",
-        "type": "bool"
       }
     ],
     "name": "FundsReleased",
@@ -199,25 +193,6 @@ const contractABI = [
       }
     ],
     "name": "ReputationAwarded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "reason",
-        "type": "string"
-      }
-    ],
-    "name": "TransferFailed",
     "type": "event"
   },
   {
@@ -359,11 +334,6 @@ const contractABI = [
     "constant": true
   },
   {
-    "stateMutability": "payable",
-    "type": "receive",
-    "payable": true
-  },
-  {
     "inputs": [
       {
         "internalType": "string",
@@ -435,19 +405,6 @@ const contractABI = [
       }
     ],
     "name": "completeProject",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_projectId",
-        "type": "uint256"
-      }
-    ],
-    "name": "releaseFunds",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -711,89 +668,6 @@ async function fetchProjects() {
     alert('Failed to fetch projects. Check the console for details.');
   }
 }
-
-async function releaseFunds() {
-  const projectId = prompt('Enter the project ID to release funds:');
-  if (!projectId || isNaN(projectId)) {
-    alert('Invalid input. Please enter a valid project ID.');
-    return;
-  }
-
-  try {
-    const project = await contract.methods.projects(projectId).call();
-    if (project.employer.toLowerCase() !== userAccount.toLowerCase()) {
-      alert('Only the employer can release funds!');
-      return;
-    }
-    if (!project.completed) {
-      alert('Project must be completed before releasing funds!');
-      return;
-    }
-    if (project.isPaid) {
-      alert('Funds have already been released for this project!');
-      return;
-    }
-
-    const receipt = await contract.methods.releaseFunds(projectId).send({ from: userAccount });
-    console.log('Funds Released:', receipt);
-    if (receipt.status) {
-      alert(`Funds released successfully for Project ID: ${projectId}`);
-    } else {
-      alert(`Funds release failed for Project ID: ${projectId}. Check console for details.`);
-    }
-    fetchProjects();
-  } catch (error) {
-    console.error('Error releasing funds:', error);
-    alert('Failed to release funds. Check the console for details.');
-  }
-}
-
-// Add event listener for the new releaseFunds button (to be added in index.html)
-const releaseFundsBtn = document.getElementById('releaseFundsBtn');
-if (releaseFundsBtn) {
-  releaseFundsBtn.addEventListener('click', releaseFunds);
-}
-
-async function depositFunds() {
-  const projectId = prompt('Enter the project ID to deposit funds:');
-  if (!projectId || isNaN(projectId)) {
-    alert('Invalid input. Please enter a valid project ID.');
-    return;
-  }
-
-  try {
-    const project = await contract.methods.projects(projectId).call();
-    if (project.employer.toLowerCase() !== userAccount.toLowerCase()) {
-      alert('Only the employer can deposit funds!');
-      return;
-    }
-    if (project.bidAmount == 0) {
-      alert('No bid amount set for this project. Assign a freelancer first.');
-      return;
-    }
-
-    const bidAmount = web3.utils.fromWei(project.bidAmount, 'ether');
-    const confirmDeposit = confirm(`Deposit ${bidAmount} ETH for Project ID: ${projectId}?`);
-    if (!confirmDeposit) return;
-
-    const receipt = await contract.methods.depositFunds(projectId).send({
-      from: userAccount,
-      value: project.bidAmount
-    });
-    console.log('Funds Deposited:', receipt);
-    alert(`Funds deposited successfully for Project ID: ${projectId}`);
-    fetchProjects();
-  } catch (error) {
-    console.error('Error depositing funds:', error);
-    alert('Failed to deposit funds. Check the console for details.');
-  }
-}
-
-const depositFundsBtn = document.getElementById('depositFundsBtn');
-if (depositFundsBtn) {
-  depositFundsBtn.addEventListener('click', depositFunds);
-}
-
 
 createProjectBtn.addEventListener('click', createProject);
 applyProjectBtn.addEventListener('click', applyForProject);

@@ -7,7 +7,7 @@ const fetchFreelancersBtn = document.getElementById('fetchFreelancersBtn');
 const freelancerTable = document.getElementById('freelancerTable');
 const assignFreelancerBtn = document.getElementById('assignFreelancerBtn');
 
-const contractAddress = '0xDD6a609Cb56aBfd0493310Fb1A452c8241E14f1E'; // Replace with the deployed HireChain address
+const contractAddress = '0x88F617cEb72399E7a31d6673CCBE7cAc0fdE5B15'; // Replace with the deployed HireChain address
 const contractABI = [
   {
     "inputs": [
@@ -84,12 +84,6 @@ const contractABI = [
         "internalType": "uint256",
         "name": "bidAmount",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "success",
-        "type": "bool"
       }
     ],
     "name": "FundsReleased",
@@ -199,25 +193,6 @@ const contractABI = [
       }
     ],
     "name": "ReputationAwarded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "reason",
-        "type": "string"
-      }
-    ],
-    "name": "TransferFailed",
     "type": "event"
   },
   {
@@ -754,45 +729,6 @@ if (releaseFundsBtn) {
   releaseFundsBtn.addEventListener('click', releaseFunds);
 }
 
-async function depositFunds() {
-  const projectId = prompt('Enter the project ID to deposit funds:');
-  if (!projectId || isNaN(projectId)) {
-    alert('Invalid input. Please enter a valid project ID.');
-    return;
-  }
-
-  try {
-    const project = await contract.methods.projects(projectId).call();
-    if (project.employer.toLowerCase() !== userAccount.toLowerCase()) {
-      alert('Only the employer can deposit funds!');
-      return;
-    }
-    if (project.bidAmount == 0) {
-      alert('No bid amount set for this project. Assign a freelancer first.');
-      return;
-    }
-
-    const bidAmount = web3.utils.fromWei(project.bidAmount, 'ether');
-    const confirmDeposit = confirm(`Deposit ${bidAmount} ETH for Project ID: ${projectId}?`);
-    if (!confirmDeposit) return;
-
-    const receipt = await contract.methods.depositFunds(projectId).send({
-      from: userAccount,
-      value: project.bidAmount
-    });
-    console.log('Funds Deposited:', receipt);
-    alert(`Funds deposited successfully for Project ID: ${projectId}`);
-    fetchProjects();
-  } catch (error) {
-    console.error('Error depositing funds:', error);
-    alert('Failed to deposit funds. Check the console for details.');
-  }
-}
-
-const depositFundsBtn = document.getElementById('depositFundsBtn');
-if (depositFundsBtn) {
-  depositFundsBtn.addEventListener('click', depositFunds);
-}
 
 
 createProjectBtn.addEventListener('click', createProject);
