@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeLancer</title>
     <script src="https://cdn.jsdelivr.net/npm/web3@1.6.1/dist/web3.min.js"></script>
+    <!-- Add ipfs-http-client -->
+    <script src="https://unpkg.com/ipfs-http-client@59.0.0/dist/index.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -27,7 +29,6 @@
                 <button id="depositFundsBtn">Deposit Funds</button>
                 <button id="completeProjectBtn">Complete Project</button>
                 <button id="releaseFundsBtn">Release Funds</button>
-                <!-- New Buttons for Mutual Agreement with Dispute Resolution -->
                 <button id="markReadyBtn">Mark Ready for Review</button>
                 <button id="approveBtn">Approve Project</button>
                 <button id="disputeBtn">Dispute Project</button>
@@ -50,6 +51,8 @@
                         <th>Bid Amount (ETH)</th>
                         <th>Completed</th>
                         <th>Applicants</th>
+                        <th>Employer File CID</th>
+                        <th>Freelancer File CID</th>
                     </tr>
                 </thead>
                 <tbody id="projectTable"></tbody>
@@ -63,12 +66,7 @@
             <div id="freelancerTable"></div>
         </section>
 
-        <!-- IPFS Section -->
-        <section class="ipfs-section">
-            <h2>IPFS File Fetcher</h2>
-            <input type="text" id="cidInput" placeholder="Enter CID" />
-            <button id="fetchButton">Fetch from IPFS</button>
-        </section>
+        <!-- Removed the non-functional IPFS section since fetching is now in the project table -->
     </main>
 
     <footer>

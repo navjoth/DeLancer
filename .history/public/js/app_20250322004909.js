@@ -778,6 +778,23 @@ const contractABI = [
 let web3;
 let contract;
 let userAccount;
+let ipfs;
+
+// Initialize IPFS client to connect to IPFS Desktop
+async function initIPFS() {
+  try {
+    // Connect to IPFS Desktop running on localhost:5001
+    ipfs = window.IpfsHttpClient({
+      host: 'localhost',
+      port: 5001,
+      protocol: 'http'
+    });
+    console.log('Connected to IPFS Desktop');
+  } catch (error) {
+    console.error('Error connecting to IPFS Desktop:', error);
+    alert('Failed to connect to IPFS Desktop. Ensure IPFS Desktop is running and try again.');
+  }
+}
 
 async function init() {
   try {
@@ -788,6 +805,7 @@ async function init() {
       userAccount = accounts[0];
       contract = new web3.eth.Contract(contractABI, contractAddress);
       document.getElementById('userAccount').textContent = `Connected Wallet: ${userAccount}`;
+      await initIPFS(); // Initialize IPFS after Web3 setup
     } else {
       alert('MetaMask is not installed. Please install it to use this app.');
     }
@@ -844,16 +862,40 @@ async function fetchFreelancers() {
 async function createProject() {
   const name = prompt('Enter the project name:');
   const description = prompt('Enter the project description:');
-  if (name && description) {
+  if (!name || !description) {
+    alert('Project name and description are required.');
+    return;
+  }
+
+  let employerFileCID = '';
+  const employerFileInput = document.getElementById('employerFileInput');
+  if (employerFileInput && employerFileInput.files.length > 0) {
     try {
-      const receipt = await contract.methods.createProject(name, description).send({ from: userAccount });
-      console.log('Project Created:', receipt);
-      alert('Project created successfully!');
-      fetchProjects(); // Re-enabled, should work with the updated fetchProjects
+      const file = employerFileInput.files[0];
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(file);
+      const buffer = await new Promise((resolve) => {
+        reader.onload = () => resolve(reader.result);
+      });
+      const ipfsResult = await ipfs.add(buffer);
+      employerFileCID = ipfsResult.path;
+      console.log('Employer file uploaded to IPFS with CID:', employerFileCID);
     } catch (error) {
-      console.error('Error creating project:', error);
-      alert('Failed to create project. Check the console for details.');
+      console.error('Error uploading employer file to IPFS:', error);
+      alert('Failed to upload employer file to IPFS: ' + error.message);
+      return;
     }
+  }
+
+  try {
+    const receipt = await contract.methods.createProject(name, description, employerFileCID).send({ from: userAccount });
+    console.log('Project Created:', receipt);
+    alert('Project created successfully!');
+    fetchProjects();
+    employerFileInput.value = ''; // Clear the file input
+  } catch (error) {
+    console.error('Error creating project:', error);
+    alert('Failed to create project: ' + error.message);
   }
 }
 
@@ -887,7 +929,7 @@ async function applyForProject() {
     fetchProjects();
   } catch (error) {
     console.error('Error applying for project:', error);
-    alert('Failed to apply for the project. Check console for details.');
+    alert('Failed to apply for the project: ' + error.message);
   }
 }
 
@@ -915,7 +957,7 @@ async function assignFreelancer() {
     fetchProjects();
   } catch (error) {
     console.error('Error assigning freelancer:', error);
-    alert('Failed to assign freelancer. Check the console for details.');
+    alert('Failed to assign freelancer: ' + error.message);
   }
 }
 
@@ -939,7 +981,7 @@ async function completeProject() {
       fetchProjects();
     } catch (error) {
       console.error('Error completing project:', error);
-      alert('Failed to complete project. Check the console for details.');
+      alert('Failed to complete project: ' + error.message);
     }
   }
 }
@@ -952,7 +994,7 @@ async function fetchProjects() {
 
     projectTable.innerHTML = '';
     if (projectCount === 0) {
-      projectTable.innerHTML = '<tr><td colspan="8">No projects found.</td></tr>';
+      projectTable.innerHTML = '<tr><td colspan="10">No projects found.</td></tr>';
       return;
     }
 
@@ -990,12 +1032,14 @@ async function fetchProjects() {
         <td>${project.bidAmount ? web3.utils.fromWei(project.bidAmount, 'ether') : 'N/A'} ETH</td>
         <td>${project.completed ? 'Yes' : 'No'}</td>
         <td>${applicantsHtml}</td>
+        <td>${project.employerFileCID ? `<button onclick="fetchFile('${project.employerFileCID}')">Fetch Employer File</button>` : 'N/A'}</td>
+        <td>${project.freelancerFileCID ? `<button onclick="fetchFile('${project.freelancerFileCID}')">Fetch Freelancer File</button>` : 'N/A'}</td>
       `;
       projectTable.appendChild(row);
     }
   } catch (error) {
     console.error('Error fetching projects:', error);
-    alert('Failed to fetch projects. Check the console for details.');
+    alert('Failed to fetch projects: ' + error.message);
   }
 }
 
@@ -1031,7 +1075,7 @@ async function releaseFunds() {
     fetchProjects();
   } catch (error) {
     console.error('Error releasing funds:', error);
-    alert('Failed to release funds. Check the console for details.');
+    alert('Failed to release funds: ' + error.message);
   }
 }
 
@@ -1071,7 +1115,7 @@ async function depositFunds() {
     fetchProjects();
   } catch (error) {
     console.error('Error depositing funds:', error);
-    alert('Failed to deposit funds. Check the console for details.');
+    alert('Failed to deposit funds: ' + error.message);
   }
 }
 
@@ -1080,13 +1124,33 @@ if (depositFundsBtn) {
   depositFundsBtn.addEventListener('click', depositFunds);
 }
 
-// --- New Code for Mutual Agreement with Dispute Resolution ---
-
-// Freelancer marks the project as ready for review
 async function markReadyForReview() {
   const projectId = prompt('Enter the project ID to mark as ready for review:');
   if (!projectId || isNaN(projectId)) {
     alert('Invalid input. Please enter a valid project ID.');
+    return;
+  }
+
+  let freelancerFileCID = '';
+  const freelancerFileInput = document.getElementById('freelancerFileInput');
+  if (freelancerFileInput && freelancerFileInput.files.length > 0) {
+    try {
+      const file = freelancerFileInput.files[0];
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(file);
+      const buffer = await new Promise((resolve) => {
+        reader.onload = () => resolve(reader.result);
+      });
+      const ipfsResult = await ipfs.add(buffer);
+      freelancerFileCID = ipfsResult.path;
+      console.log('Freelancer file uploaded to IPFS with CID:', freelancerFileCID);
+    } catch (error) {
+      console.error('Error uploading freelancer file to IPFS:', error);
+      alert('Failed to upload freelancer file to IPFS: ' + error.message);
+      return;
+    }
+  } else {
+    alert('Please upload a file to submit your work.');
     return;
   }
 
@@ -1102,22 +1166,22 @@ async function markReadyForReview() {
     }
 
     const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 0) { // 0 is Active
+    if (reviewStatus.state != 0) {
       alert('Project is not in active state!');
       return;
     }
 
-    const receipt = await contract.methods.markReadyForReview(projectId).send({ from: userAccount });
+    const receipt = await contract.methods.markReadyForReview(projectId, freelancerFileCID).send({ from: userAccount });
     console.log('Marked Ready for Review:', receipt);
     alert(`Project ID ${projectId} marked as ready for review! Employer has 7 days to respond.`);
     fetchProjects();
+    freelancerFileInput.value = ''; // Clear the file input
   } catch (error) {
     console.error('Error marking project as ready for review:', error);
     alert(`Failed to mark project as ready for review: ${error.message}`);
   }
 }
 
-// Employer approves the project
 async function approveProject() {
   const projectId = prompt('Enter the project ID to approve:');
   if (!projectId || isNaN(projectId)) {
@@ -1137,7 +1201,7 @@ async function approveProject() {
     }
 
     const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 1 && reviewStatus.state != 3) { // 1 is ReadyForReview, 3 is Resubmitted
+    if (reviewStatus.state != 1 && reviewStatus.state != 3) {
       alert('Project is not ready for review or resubmitted!');
       return;
     }
@@ -1152,7 +1216,6 @@ async function approveProject() {
   }
 }
 
-// Employer disputes the project
 async function disputeProject() {
   const projectId = prompt('Enter the project ID to dispute:');
   if (!projectId || isNaN(projectId)) {
@@ -1172,7 +1235,7 @@ async function disputeProject() {
     }
 
     const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 1 && reviewStatus.state != 3) { // 1 is ReadyForReview, 3 is Resubmitted
+    if (reviewStatus.state != 1 && reviewStatus.state != 3) {
       alert('Project is not ready for dispute!');
       return;
     }
@@ -1187,11 +1250,33 @@ async function disputeProject() {
   }
 }
 
-// Freelancer resubmits the project
 async function resubmitProject() {
   const projectId = prompt('Enter the project ID to resubmit:');
   if (!projectId || isNaN(projectId)) {
     alert('Invalid input. Please enter a valid project ID.');
+    return;
+  }
+
+  let freelancerFileCID = '';
+  const freelancerFileInput = document.getElementById('freelancerFileInput');
+  if (freelancerFileInput && freelancerFileInput.files.length > 0) {
+    try {
+      const file = freelancerFileInput.files[0];
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(file);
+      const buffer = await new Promise((resolve) => {
+        reader.onload = () => resolve(reader.result);
+      });
+      const ipfsResult = await ipfs.add(buffer);
+      freelancerFileCID = ipfsResult.path;
+      console.log('Freelancer file uploaded to IPFS with CID:', freelancerFileCID);
+    } catch (error) {
+      console.error('Error uploading freelancer file to IPFS:', error);
+      alert('Failed to upload freelancer file to IPFS: ' + error.message);
+      return;
+    }
+  } else {
+    alert('Please upload a file to resubmit your work.');
     return;
   }
 
@@ -1207,28 +1292,28 @@ async function resubmitProject() {
     }
 
     const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 2) { // 2 is Disputed
+    if (reviewStatus.state != 2) {
       alert('Project is not in disputed state!');
       return;
     }
 
-    const deadline = parseInt(reviewStatus.disputeTimestamp) + (3 * 24 * 60 * 60); // 3 days in seconds
+    const deadline = parseInt(reviewStatus.disputeTimestamp) + (3 * 24 * 60 * 60);
     if (Math.floor(Date.now() / 1000) > deadline) {
       alert('Resubmission deadline has passed!');
       return;
     }
 
-    const receipt = await contract.methods.resubmitProject(projectId).send({ from: userAccount });
+    const receipt = await contract.methods.resubmitProject(projectId, freelancerFileCID).send({ from: userAccount });
     console.log('Project Resubmitted:', receipt);
     alert(`Project ID ${projectId} resubmitted! Employer has 3 days to review.`);
     fetchProjects();
+    freelancerFileInput.value = ''; // Clear the file input
   } catch (error) {
     console.error('Error resubmitting project:', error);
     alert(`Failed to resubmit project: ${error.message}`);
   }
 }
 
-// Check deadlines for auto-release or fund splitting
 async function checkDeadlines() {
   const projectId = prompt('Enter the project ID to check deadlines:');
   if (!projectId || isNaN(projectId)) {
@@ -1244,7 +1329,7 @@ async function checkDeadlines() {
     }
 
     const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state == 0 || reviewStatus.state == 4) { // 0 is Active, 4 is Completed
+    if (reviewStatus.state == 0 || reviewStatus.state == 4) {
       alert('Project is not in a review state!');
       return;
     }
@@ -1259,7 +1344,37 @@ async function checkDeadlines() {
   }
 }
 
-// Add event listeners for new buttons
+// Fetch file from IPFS and display it
+async function fetchFile(cid) {
+  try {
+    const fileContent = await ipfs.get(cid);
+    const fileDisplay = document.getElementById('fileDisplay');
+    fileDisplay.innerHTML = '';
+
+    for await (const file of fileContent) {
+      if (!file.content) continue;
+
+      const content = [];
+      for await (const chunk of file.content) {
+        content.push(chunk);
+      }
+
+      const blob = new Blob(content, { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ipfs-file-${cid}`;
+      link.textContent = `Download File (CID: ${cid})`;
+      fileDisplay.appendChild(link);
+      fileDisplay.appendChild(document.createElement('br'));
+    }
+  } catch (error) {
+    console.error('Error fetching file from IPFS:', error);
+    alert('Failed to fetch file from IPFS: ' + error.message);
+  }
+}
+
+// Add event listeners
 const markReadyBtn = document.getElementById('markReadyBtn');
 if (markReadyBtn) {
   markReadyBtn.addEventListener('click', markReadyForReview);

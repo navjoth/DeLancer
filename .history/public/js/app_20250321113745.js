@@ -7,7 +7,7 @@ const fetchFreelancersBtn = document.getElementById('fetchFreelancersBtn');
 const freelancerTable = document.getElementById('freelancerTable');
 const assignFreelancerBtn = document.getElementById('assignFreelancerBtn');
 
-const contractAddress = '0x59Cb27bD15c29efb827D009269535ceaF5D068b4'; // Replace with the deployed HireChain address
+const contractAddress = '0xDD6a609Cb56aBfd0493310Fb1A452c8241E14f1E'; // Replace with the deployed HireChain address
 const contractABI = [
   {
     "inputs": [
@@ -43,31 +43,6 @@ const contractABI = [
       }
     ],
     "name": "FreelancerAssigned",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "projectId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "freelancer",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "FundsAutoReleased",
     "type": "event"
   },
   {
@@ -126,31 +101,6 @@ const contractABI = [
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "projectId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "employerAmount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "freelancerAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "FundsSplit",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
         "name": "id",
         "type": "uint256"
       },
@@ -168,25 +118,6 @@ const contractABI = [
       }
     ],
     "name": "ProjectApplied",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "projectId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "employer",
-        "type": "address"
-      }
-    ],
-    "name": "ProjectApproved",
     "type": "event"
   },
   {
@@ -256,81 +187,6 @@ const contractABI = [
     "inputs": [
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "projectId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "employer",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
-      }
-    ],
-    "name": "ProjectDisputed",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "projectId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "freelancer",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
-      }
-    ],
-    "name": "ProjectMarkedReadyForReview",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "projectId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "freelancer",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
-      }
-    ],
-    "name": "ProjectResubmitted",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
         "internalType": "address",
         "name": "freelancer",
         "type": "address"
@@ -363,48 +219,6 @@ const contractABI = [
     ],
     "name": "TransferFailed",
     "type": "event"
-  },
-  {
-    "inputs": [],
-    "name": "EMPLOYER_REDISPUTE_DEADLINE",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
-  },
-  {
-    "inputs": [],
-    "name": "EMPLOYER_REVIEW_DEADLINE",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
-  },
-  {
-    "inputs": [],
-    "name": "FREELANCER_RESUBMIT_DEADLINE",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
   },
   {
     "inputs": [
@@ -545,41 +359,6 @@ const contractABI = [
     "constant": true
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "reviewStatuses",
-    "outputs": [
-      {
-        "internalType": "enum HireChain.ProjectState",
-        "name": "state",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint256",
-        "name": "readyForReviewTimestamp",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "disputeTimestamp",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "employerApproved",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
-  },
-  {
     "stateMutability": "payable",
     "type": "receive",
     "payable": true
@@ -706,74 +485,8 @@ const contractABI = [
     "stateMutability": "view",
     "type": "function",
     "constant": true
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_projectId",
-        "type": "uint256"
-      }
-    ],
-    "name": "markReadyForReview",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_projectId",
-        "type": "uint256"
-      }
-    ],
-    "name": "approveProject",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_projectId",
-        "type": "uint256"
-      }
-    ],
-    "name": "disputeProject",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_projectId",
-        "type": "uint256"
-      }
-    ],
-    "name": "resubmitProject",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_projectId",
-        "type": "uint256"
-      }
-    ],
-    "name": "checkDeadlines",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
   }
 ];
-
 
 let web3;
 let contract;
@@ -1035,6 +748,7 @@ async function releaseFunds() {
   }
 }
 
+// Add event listener for the new releaseFunds button (to be added in index.html)
 const releaseFundsBtn = document.getElementById('releaseFundsBtn');
 if (releaseFundsBtn) {
   releaseFundsBtn.addEventListener('click', releaseFunds);
@@ -1080,210 +794,6 @@ if (depositFundsBtn) {
   depositFundsBtn.addEventListener('click', depositFunds);
 }
 
-// --- New Code for Mutual Agreement with Dispute Resolution ---
-
-// Freelancer marks the project as ready for review
-async function markReadyForReview() {
-  const projectId = prompt('Enter the project ID to mark as ready for review:');
-  if (!projectId || isNaN(projectId)) {
-    alert('Invalid input. Please enter a valid project ID.');
-    return;
-  }
-
-  try {
-    const project = await contract.methods.projects(projectId).call();
-    if (project.freelancer.toLowerCase() !== userAccount.toLowerCase()) {
-      alert('Only the assigned freelancer can mark the project as ready for review!');
-      return;
-    }
-    if (project.isPaid) {
-      alert('Funds have already been released for this project!');
-      return;
-    }
-
-    const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 0) { // 0 is Active
-      alert('Project is not in active state!');
-      return;
-    }
-
-    const receipt = await contract.methods.markReadyForReview(projectId).send({ from: userAccount });
-    console.log('Marked Ready for Review:', receipt);
-    alert(`Project ID ${projectId} marked as ready for review! Employer has 7 days to respond.`);
-    fetchProjects();
-  } catch (error) {
-    console.error('Error marking project as ready for review:', error);
-    alert(`Failed to mark project as ready for review: ${error.message}`);
-  }
-}
-
-// Employer approves the project
-async function approveProject() {
-  const projectId = prompt('Enter the project ID to approve:');
-  if (!projectId || isNaN(projectId)) {
-    alert('Invalid input. Please enter a valid project ID.');
-    return;
-  }
-
-  try {
-    const project = await contract.methods.projects(projectId).call();
-    if (project.employer.toLowerCase() !== userAccount.toLowerCase()) {
-      alert('Only the employer can approve the project!');
-      return;
-    }
-    if (project.isPaid) {
-      alert('Funds have already been released for this project!');
-      return;
-    }
-
-    const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 1 && reviewStatus.state != 3) { // 1 is ReadyForReview, 3 is Resubmitted
-      alert('Project is not ready for review or resubmitted!');
-      return;
-    }
-
-    const receipt = await contract.methods.approveProject(projectId).send({ from: userAccount });
-    console.log('Project Approved:', receipt);
-    alert(`Project ID ${projectId} approved! Funds released to freelancer.`);
-    fetchProjects();
-  } catch (error) {
-    console.error('Error approving project:', error);
-    alert(`Failed to approve project: ${error.message}`);
-  }
-}
-
-// Employer disputes the project
-async function disputeProject() {
-  const projectId = prompt('Enter the project ID to dispute:');
-  if (!projectId || isNaN(projectId)) {
-    alert('Invalid input. Please enter a valid project ID.');
-    return;
-  }
-
-  try {
-    const project = await contract.methods.projects(projectId).call();
-    if (project.employer.toLowerCase() !== userAccount.toLowerCase()) {
-      alert('Only the employer can dispute the project!');
-      return;
-    }
-    if (project.isPaid) {
-      alert('Funds have already been released for this project!');
-      return;
-    }
-
-    const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 1 && reviewStatus.state != 3) { // 1 is ReadyForReview, 3 is Resubmitted
-      alert('Project is not ready for dispute!');
-      return;
-    }
-
-    const receipt = await contract.methods.disputeProject(projectId).send({ from: userAccount });
-    console.log('Project Disputed:', receipt);
-    alert(`Project ID ${projectId} disputed! Freelancer has 3 days to resubmit.`);
-    fetchProjects();
-  } catch (error) {
-    console.error('Error disputing project:', error);
-    alert(`Failed to dispute project: ${error.message}`);
-  }
-}
-
-// Freelancer resubmits the project
-async function resubmitProject() {
-  const projectId = prompt('Enter the project ID to resubmit:');
-  if (!projectId || isNaN(projectId)) {
-    alert('Invalid input. Please enter a valid project ID.');
-    return;
-  }
-
-  try {
-    const project = await contract.methods.projects(projectId).call();
-    if (project.freelancer.toLowerCase() !== userAccount.toLowerCase()) {
-      alert('Only the assigned freelancer can resubmit the project!');
-      return;
-    }
-    if (project.isPaid) {
-      alert('Funds have already been released for this project!');
-      return;
-    }
-
-    const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 2) { // 2 is Disputed
-      alert('Project is not in disputed state!');
-      return;
-    }
-
-    const deadline = parseInt(reviewStatus.disputeTimestamp) + (3 * 24 * 60 * 60); // 3 days in seconds
-    if (Math.floor(Date.now() / 1000) > deadline) {
-      alert('Resubmission deadline has passed!');
-      return;
-    }
-
-    const receipt = await contract.methods.resubmitProject(projectId).send({ from: userAccount });
-    console.log('Project Resubmitted:', receipt);
-    alert(`Project ID ${projectId} resubmitted! Employer has 3 days to review.`);
-    fetchProjects();
-  } catch (error) {
-    console.error('Error resubmitting project:', error);
-    alert(`Failed to resubmit project: ${error.message}`);
-  }
-}
-
-// Check deadlines for auto-release or fund splitting
-async function checkDeadlines() {
-  const projectId = prompt('Enter the project ID to check deadlines:');
-  if (!projectId || isNaN(projectId)) {
-    alert('Invalid input. Please enter a valid project ID.');
-    return;
-  }
-
-  try {
-    const project = await contract.methods.projects(projectId).call();
-    if (project.isPaid) {
-      alert('Funds have already been released for this project!');
-      return;
-    }
-
-    const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state == 0 || reviewStatus.state == 4) { // 0 is Active, 4 is Completed
-      alert('Project is not in a review state!');
-      return;
-    }
-
-    const receipt = await contract.methods.checkDeadlines(projectId).send({ from: userAccount });
-    console.log('Deadlines Checked:', receipt);
-    alert(`Deadlines checked for Project ID ${projectId}. Check project status.`);
-    fetchProjects();
-  } catch (error) {
-    console.error('Error checking deadlines:', error);
-    alert(`Failed to check deadlines: ${error.message}`);
-  }
-}
-
-// Add event listeners for new buttons
-const markReadyBtn = document.getElementById('markReadyBtn');
-if (markReadyBtn) {
-  markReadyBtn.addEventListener('click', markReadyForReview);
-}
-
-const approveBtn = document.getElementById('approveBtn');
-if (approveBtn) {
-  approveBtn.addEventListener('click', approveProject);
-}
-
-const disputeBtn = document.getElementById('disputeBtn');
-if (disputeBtn) {
-  disputeBtn.addEventListener('click', disputeProject);
-}
-
-const resubmitBtn = document.getElementById('resubmitBtn');
-if (resubmitBtn) {
-  resubmitBtn.addEventListener('click', resubmitProject);
-}
-
-const checkDeadlinesBtn = document.getElementById('checkDeadlinesBtn');
-if (checkDeadlinesBtn) {
-  checkDeadlinesBtn.addEventListener('click', checkDeadlines);
-}
 
 createProjectBtn.addEventListener('click', createProject);
 applyProjectBtn.addEventListener('click', applyForProject);

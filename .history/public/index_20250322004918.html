@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeLancer</title>
     <script src="https://cdn.jsdelivr.net/npm/web3@1.6.1/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/ipfs-http-client@59.0.0/dist/index.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -27,12 +28,20 @@
                 <button id="depositFundsBtn">Deposit Funds</button>
                 <button id="completeProjectBtn">Complete Project</button>
                 <button id="releaseFundsBtn">Release Funds</button>
-                <!-- New Buttons for Mutual Agreement with Dispute Resolution -->
                 <button id="markReadyBtn">Mark Ready for Review</button>
                 <button id="approveBtn">Approve Project</button>
                 <button id="disputeBtn">Dispute Project</button>
                 <button id="resubmitBtn">Resubmit Project</button>
                 <button id="checkDeadlinesBtn">Check Deadlines</button>
+            </div>
+            <!-- File Upload Inputs -->
+            <div class="file-upload-section">
+                <h3>File Uploads</h3>
+                <label for="employerFileInput">Employer File (Optional, for Create Project):</label>
+                <input type="file" id="employerFileInput" />
+                <br />
+                <label for="freelancerFileInput">Freelancer File (Required for Mark Ready/Resubmit):</label>
+                <input type="file" id="freelancerFileInput" />
             </div>
         </section>
 
@@ -50,6 +59,8 @@
                         <th>Bid Amount (ETH)</th>
                         <th>Completed</th>
                         <th>Applicants</th>
+                        <th>Employer File</th>
+                        <th>Freelancer File</th>
                     </tr>
                 </thead>
                 <tbody id="projectTable"></tbody>
@@ -65,9 +76,9 @@
 
         <!-- IPFS Section -->
         <section class="ipfs-section">
-            <h2>IPFS File Fetcher</h2>
-            <input type="text" id="cidInput" placeholder="Enter CID" />
-            <button id="fetchButton">Fetch from IPFS</button>
+            <h2>IPFS File Viewer</h2>
+            <p>Click the "Fetch File" buttons in the project table to view files. Downloads will appear below.</p>
+            <div id="fileDisplay"></div>
         </section>
     </main>
 

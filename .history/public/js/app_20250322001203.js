@@ -778,6 +778,59 @@ const contractABI = [
 let web3;
 let contract;
 let userAccount;
+let ipfs;
+
+// --- New Code for IPFS Integration ---
+
+// Initialize IPFS client
+async function initIPFS() {
+  try {
+    // Use Infura's IPFS API (you can replace with your own IPFS node if needed)
+    ipfs = window.IpfsHttpClient({
+      host: 'ipfs.infura.io',
+      port: 5001,
+      protocol: 'https',
+      headers: {
+        authorization: 'Basic ' + btoa('YOUR_INFURA_PROJECT_ID:YOUR_INFURA_API_SECRET') // Replace with your Infura credentials
+      }
+    });
+    console.log('IPFS client initialized');
+  } catch (error) {
+    console.error('Error initializing IPFS:', error);
+    alert('Failed to initialize IPFS. Please check your Infura credentials or IPFS node setup.');
+  }
+}
+
+// Helper function to upload a file to IPFS
+async function uploadFileToIPFS(file) {
+  try {
+    if (!file) return '';
+    const fileBuffer = await file.arrayBuffer();
+    const result = await ipfs.add(fileBuffer);
+    return result.path; // Returns the CID
+  } catch (error) {
+    console.error('Error uploading file to IPFS:', error);
+    throw new Error('Failed to upload file to IPFS: ' + error.message);
+  }
+}
+
+// Helper function to fetch a file from IPFS
+async function fetchFileFromIPFS(cid) {
+  try {
+    if (!cid) throw new Error('No CID provided');
+    const stream = ipfs.cat(cid);
+    const chunks = [];
+    for await (const chunk of stream) {
+      chunks.push(chunk);
+    }
+    const blob = new Blob(chunks);
+    const url = URL.createObjectURL(blob);
+    return url;
+  } catch (error) {
+    console.error('Error fetching file from IPFS:', error);
+    throw new Error('Failed to fetch file from IPFS: ' + error.message);
+  }
+}
 
 async function init() {
   try {
@@ -788,6 +841,7 @@ async function init() {
       userAccount = accounts[0];
       contract = new web3.eth.Contract(contractABI, contractAddress);
       document.getElementById('userAccount').textContent = `Connected Wallet: ${userAccount}`;
+      await initIPFS(); // Initialize IPFS after Web3 setup
     } else {
       alert('MetaMask is not installed. Please install it to use this app.');
     }
@@ -844,17 +898,35 @@ async function fetchFreelancers() {
 async function createProject() {
   const name = prompt('Enter the project name:');
   const description = prompt('Enter the project description:');
-  if (name && description) {
+  if (!name || !description) {
+    alert('Project name and description are required.');
+    return;
+  }
+
+  // Create a temporary file input for the employer to upload a file
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = '*/*';
+  fileInput.onchange = async (event) => {
+    const file = event.target.files[0];
+    let employerFileCID = '';
+
     try {
-      const receipt = await contract.methods.createProject(name, description).send({ from: userAccount });
+      if (file) {
+        employerFileCID = await uploadFileToIPFS(file);
+        alert('File uploaded to IPFS successfully! CID: ' + employerFileCID);
+      }
+
+      const receipt = await contract.methods.createProjectWithFile(name, description, employerFileCID).send({ from: userAccount });
       console.log('Project Created:', receipt);
       alert('Project created successfully!');
-      fetchProjects(); // Re-enabled, should work with the updated fetchProjects
+      fetchProjects();
     } catch (error) {
       console.error('Error creating project:', error);
-      alert('Failed to create project. Check the console for details.');
+      alert('Failed to create project: ' + error.message);
     }
-  }
+  };
+  fileInput.click();
 }
 
 async function applyForProject() {
@@ -952,7 +1024,7 @@ async function fetchProjects() {
 
     projectTable.innerHTML = '';
     if (projectCount === 0) {
-      projectTable.innerHTML = '<tr><td colspan="8">No projects found.</td></tr>';
+      projectTable.innerHTML = '<tr><td colspan="10">No projects found.</td></tr>';
       return;
     }
 
@@ -990,6 +1062,8 @@ async function fetchProjects() {
         <td>${project.bidAmount ? web3.utils.fromWei(project.bidAmount, 'ether') : 'N/A'} ETH</td>
         <td>${project.completed ? 'Yes' : 'No'}</td>
         <td>${applicantsHtml}</td>
+        <td>${project.employerFileCID ? `<a href="#" onclick="fetchAndOpenFile('${project.employerFileCID}')">${project.employerFileCID}</a>` : 'N/A'}</td>
+        <td>${project.freelancerFileCID ? `<a href="#" onclick="fetchAndOpenFile('${project.freelancerFileCID}')">${project.freelancerFileCID}</a>` : 'N/A'}</td>
       `;
       projectTable.appendChild(row);
     }
@@ -1080,9 +1154,6 @@ if (depositFundsBtn) {
   depositFundsBtn.addEventListener('click', depositFunds);
 }
 
-// --- New Code for Mutual Agreement with Dispute Resolution ---
-
-// Freelancer marks the project as ready for review
 async function markReadyForReview() {
   const projectId = prompt('Enter the project ID to mark as ready for review:');
   if (!projectId || isNaN(projectId)) {
@@ -1102,22 +1173,41 @@ async function markReadyForReview() {
     }
 
     const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 0) { // 0 is Active
+    if (reviewStatus.state != 0) {
       alert('Project is not in active state!');
       return;
     }
 
-    const receipt = await contract.methods.markReadyForReview(projectId).send({ from: userAccount });
-    console.log('Marked Ready for Review:', receipt);
-    alert(`Project ID ${projectId} marked as ready for review! Employer has 7 days to respond.`);
-    fetchProjects();
+    // Create a temporary file input for the freelancer to upload a file
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '*/*';
+    fileInput.onchange = async (event) => {
+      const file = event.target.files[0];
+      let freelancerFileCID = '';
+
+      try {
+        if (file) {
+          freelancerFileCID = await uploadFileToIPFS(file);
+          alert('File uploaded to IPFS successfully! CID: ' + freelancerFileCID);
+        }
+
+        const receipt = await contract.methods.markReadyForReviewWithFile(projectId, freelancerFileCID).send({ from: userAccount });
+        console.log('Marked Ready for Review:', receipt);
+        alert(`Project ID ${projectId} marked as ready for review! Employer has 7 days to respond.`);
+        fetchProjects();
+      } catch (error) {
+        console.error('Error marking project as ready for review:', error);
+        alert(`Failed to mark project as ready for review: ${error.message}`);
+      }
+    };
+    fileInput.click();
   } catch (error) {
     console.error('Error marking project as ready for review:', error);
     alert(`Failed to mark project as ready for review: ${error.message}`);
   }
 }
 
-// Employer approves the project
 async function approveProject() {
   const projectId = prompt('Enter the project ID to approve:');
   if (!projectId || isNaN(projectId)) {
@@ -1137,7 +1227,7 @@ async function approveProject() {
     }
 
     const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 1 && reviewStatus.state != 3) { // 1 is ReadyForReview, 3 is Resubmitted
+    if (reviewStatus.state != 1 && reviewStatus.state != 3) {
       alert('Project is not ready for review or resubmitted!');
       return;
     }
@@ -1152,7 +1242,6 @@ async function approveProject() {
   }
 }
 
-// Employer disputes the project
 async function disputeProject() {
   const projectId = prompt('Enter the project ID to dispute:');
   if (!projectId || isNaN(projectId)) {
@@ -1172,7 +1261,7 @@ async function disputeProject() {
     }
 
     const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 1 && reviewStatus.state != 3) { // 1 is ReadyForReview, 3 is Resubmitted
+    if (reviewStatus.state != 1 && reviewStatus.state != 3) {
       alert('Project is not ready for dispute!');
       return;
     }
@@ -1187,7 +1276,6 @@ async function disputeProject() {
   }
 }
 
-// Freelancer resubmits the project
 async function resubmitProject() {
   const projectId = prompt('Enter the project ID to resubmit:');
   if (!projectId || isNaN(projectId)) {
@@ -1207,28 +1295,47 @@ async function resubmitProject() {
     }
 
     const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 2) { // 2 is Disputed
+    if (reviewStatus.state != 2) {
       alert('Project is not in disputed state!');
       return;
     }
 
-    const deadline = parseInt(reviewStatus.disputeTimestamp) + (3 * 24 * 60 * 60); // 3 days in seconds
+    const deadline = parseInt(reviewStatus.disputeTimestamp) + (3 * 24 * 60 * 60);
     if (Math.floor(Date.now() / 1000) > deadline) {
       alert('Resubmission deadline has passed!');
       return;
     }
 
-    const receipt = await contract.methods.resubmitProject(projectId).send({ from: userAccount });
-    console.log('Project Resubmitted:', receipt);
-    alert(`Project ID ${projectId} resubmitted! Employer has 3 days to review.`);
-    fetchProjects();
+    // Create a temporary file input for the freelancer to upload a file
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '*/*';
+    fileInput.onchange = async (event) => {
+      const file = event.target.files[0];
+      let freelancerFileCID = '';
+
+      try {
+        if (file) {
+          freelancerFileCID = await uploadFileToIPFS(file);
+          alert('File uploaded to IPFS successfully! CID: ' + freelancerFileCID);
+        }
+
+        const receipt = await contract.methods.resubmitProjectWithFile(projectId, freelancerFileCID).send({ from: userAccount });
+        console.log('Project Resubmitted:', receipt);
+        alert(`Project ID ${projectId} resubmitted! Employer has 3 days to review.`);
+        fetchProjects();
+      } catch (error) {
+        console.error('Error resubmitting project:', error);
+        alert(`Failed to resubmit project: ${error.message}`);
+      }
+    };
+    fileInput.click();
   } catch (error) {
     console.error('Error resubmitting project:', error);
     alert(`Failed to resubmit project: ${error.message}`);
   }
 }
 
-// Check deadlines for auto-release or fund splitting
 async function checkDeadlines() {
   const projectId = prompt('Enter the project ID to check deadlines:');
   if (!projectId || isNaN(projectId)) {
@@ -1244,7 +1351,7 @@ async function checkDeadlines() {
     }
 
     const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state == 0 || reviewStatus.state == 4) { // 0 is Active, 4 is Completed
+    if (reviewStatus.state == 0 || reviewStatus.state == 4) {
       alert('Project is not in a review state!');
       return;
     }
@@ -1258,6 +1365,20 @@ async function checkDeadlines() {
     alert(`Failed to check deadlines: ${error.message}`);
   }
 }
+
+// Function to fetch and open a file from IPFS
+async function fetchAndOpenFile(cid) {
+  try {
+    const url = await fetchFileFromIPFS(cid);
+    window.open(url, '_blank');
+  } catch (error) {
+    console.error('Error opening file:', error);
+    alert(error.message);
+  }
+}
+
+// Make fetchAndOpenFile globally accessible for onclick events
+window.fetchAndOpenFile = fetchAndOpenFile;
 
 // Add event listeners for new buttons
 const markReadyBtn = document.getElementById('markReadyBtn');

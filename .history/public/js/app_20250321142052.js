@@ -7,7 +7,7 @@ const fetchFreelancersBtn = document.getElementById('fetchFreelancersBtn');
 const freelancerTable = document.getElementById('freelancerTable');
 const assignFreelancerBtn = document.getElementById('assignFreelancerBtn');
 
-const contractAddress = '0x59Cb27bD15c29efb827D009269535ceaF5D068b4'; // Replace with the deployed HireChain address
+const contractAddress = '0x9C2cEdAa990237599c9F6aC01ad9a85f213D4f0d'; // Replace with the deployed HireChain address
 const contractABI = [
   {
     "inputs": [
@@ -43,31 +43,6 @@ const contractABI = [
       }
     ],
     "name": "FreelancerAssigned",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "projectId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "freelancer",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "FundsAutoReleased",
     "type": "event"
   },
   {
@@ -126,31 +101,6 @@ const contractABI = [
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "projectId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "employerAmount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "freelancerAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "FundsSplit",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
         "name": "id",
         "type": "uint256"
       },
@@ -168,25 +118,6 @@ const contractABI = [
       }
     ],
     "name": "ProjectApplied",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "projectId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "employer",
-        "type": "address"
-      }
-    ],
-    "name": "ProjectApproved",
     "type": "event"
   },
   {
@@ -256,81 +187,6 @@ const contractABI = [
     "inputs": [
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "projectId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "employer",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
-      }
-    ],
-    "name": "ProjectDisputed",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "projectId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "freelancer",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
-      }
-    ],
-    "name": "ProjectMarkedReadyForReview",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "projectId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "freelancer",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "timestamp",
-        "type": "uint256"
-      }
-    ],
-    "name": "ProjectResubmitted",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
         "internalType": "address",
         "name": "freelancer",
         "type": "address"
@@ -363,48 +219,6 @@ const contractABI = [
     ],
     "name": "TransferFailed",
     "type": "event"
-  },
-  {
-    "inputs": [],
-    "name": "EMPLOYER_REDISPUTE_DEADLINE",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
-  },
-  {
-    "inputs": [],
-    "name": "EMPLOYER_REVIEW_DEADLINE",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
-  },
-  {
-    "inputs": [],
-    "name": "FREELANCER_RESUBMIT_DEADLINE",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
   },
   {
     "inputs": [
@@ -545,41 +359,6 @@ const contractABI = [
     "constant": true
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "reviewStatuses",
-    "outputs": [
-      {
-        "internalType": "enum HireChain.ProjectState",
-        "name": "state",
-        "type": "uint8"
-      },
-      {
-        "internalType": "uint256",
-        "name": "readyForReviewTimestamp",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "disputeTimestamp",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "employerApproved",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
-  },
-  {
     "stateMutability": "payable",
     "type": "receive",
     "payable": true
@@ -706,74 +485,8 @@ const contractABI = [
     "stateMutability": "view",
     "type": "function",
     "constant": true
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_projectId",
-        "type": "uint256"
-      }
-    ],
-    "name": "markReadyForReview",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_projectId",
-        "type": "uint256"
-      }
-    ],
-    "name": "approveProject",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_projectId",
-        "type": "uint256"
-      }
-    ],
-    "name": "disputeProject",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_projectId",
-        "type": "uint256"
-      }
-    ],
-    "name": "resubmitProject",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_projectId",
-        "type": "uint256"
-      }
-    ],
-    "name": "checkDeadlines",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
   }
 ];
-
 
 let web3;
 let contract;
@@ -944,60 +657,60 @@ async function completeProject() {
   }
 }
 
-async function fetchProjects() {
-  try {
-    console.log('Fetching project count...');
-    const projectCount = await contract.methods.projectCount().call();
-    console.log(`Project count: ${projectCount}`);
+// async function fetchProjects() {
+//   try {
+//     console.log('Fetching project count...');
+//     const projectCount = await contract.methods.projectCount().call();
+//     console.log(`Project count: ${projectCount}`);
 
-    projectTable.innerHTML = '';
-    if (projectCount === 0) {
-      projectTable.innerHTML = '<tr><td colspan="8">No projects found.</td></tr>';
-      return;
-    }
+//     projectTable.innerHTML = '';
+//     if (projectCount === 0) {
+//       projectTable.innerHTML = '<tr><td colspan="8">No projects found.</td></tr>';
+//       return;
+//     }
 
-    for (let i = 1; i <= projectCount; i++) {
-      console.log(`Fetching project ${i}...`);
-      const project = await contract.methods.projects(i).call();
-      console.log(`Project ${i} details:`, project);
+//     for (let i = 1; i <= projectCount; i++) {
+//       console.log(`Fetching project ${i}...`);
+//       const project = await contract.methods.projects(i).call();
+//       console.log(`Project ${i} details:`, project);
 
-      let applicantsHtml = '';
-      try {
-        const proposals = await contract.methods.feeProposals(i).call();
-        console.log(`Proposals for project ${i}:`, proposals);
-        if (proposals.length > 0) {
-          for (let j = 0; j < proposals.length; j++) {
-            const freelancer = proposals[j].freelancer;
-            const proposedFee = web3.utils.fromWei(proposals[j].proposedFee, 'ether');
-            const reputation = await contract.methods.getFreelancerReputation(freelancer).call();
-            applicantsHtml += `Freelancer: ${freelancer}, Fee: ${proposedFee} ETH, Reputation: ${web3.utils.fromWei(reputation, 'ether')} REP<br>`;
-          }
-        } else {
-          applicantsHtml = 'No applicants yet';
-        }
-      } catch (proposalError) {
-        console.error(`Error fetching proposals for project ${i}:`, proposalError);
-        applicantsHtml = 'Error fetching applicants';
-      }
+//       let applicantsHtml = '';
+//       try {
+//         const proposals = await contract.methods.feeProposals(i).call();
+//         console.log(`Proposals for project ${i}:`, proposals);
+//         if (proposals.length > 0) {
+//           for (let j = 0; j < proposals.length; j++) {
+//             const freelancer = proposals[j].freelancer;
+//             const proposedFee = web3.utils.fromWei(proposals[j].proposedFee, 'ether');
+//             const reputation = await contract.methods.getFreelancerReputation(freelancer).call();
+//             applicantsHtml += `Freelancer: ${freelancer}, Fee: ${proposedFee} ETH, Reputation: ${web3.utils.fromWei(reputation, 'ether')} REP<br>`;
+//           }
+//         } else {
+//           applicantsHtml = 'No applicants yet';
+//         }
+//       } catch (proposalError) {
+//         console.error(`Error fetching proposals for project ${i}:`, proposalError);
+//         applicantsHtml = 'Error fetching applicants';
+//       }
 
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${project.id}</td>
-        <td>${project.name}</td>
-        <td>${project.description}</td>
-        <td>${project.employer}</td>
-        <td>${project.freelancer || 'N/A'}</td>
-        <td>${project.bidAmount ? web3.utils.fromWei(project.bidAmount, 'ether') : 'N/A'} ETH</td>
-        <td>${project.completed ? 'Yes' : 'No'}</td>
-        <td>${applicantsHtml}</td>
-      `;
-      projectTable.appendChild(row);
-    }
-  } catch (error) {
-    console.error('Error fetching projects:', error);
-    alert('Failed to fetch projects. Check the console for details.');
-  }
-}
+//       const row = document.createElement('tr');
+//       row.innerHTML = `
+//         <td>${project.id}</td>
+//         <td>${project.name}</td>
+//         <td>${project.description}</td>
+//         <td>${project.employer}</td>
+//         <td>${project.freelancer || 'N/A'}</td>
+//         <td>${project.bidAmount ? web3.utils.fromWei(project.bidAmount, 'ether') : 'N/A'} ETH</td>
+//         <td>${project.completed ? 'Yes' : 'No'}</td>
+//         <td>${applicantsHtml}</td>
+//       `;
+//       projectTable.appendChild(row);
+//     }
+//   } catch (error) {
+//     console.error('Error fetching projects:', error);
+//     alert('Failed to fetch projects. Check the console for details.');
+//   }
+// }
 
 async function releaseFunds() {
   const projectId = prompt('Enter the project ID to release funds:');
@@ -1035,6 +748,7 @@ async function releaseFunds() {
   }
 }
 
+// Add event listener for the new releaseFunds button (to be added in index.html)
 const releaseFundsBtn = document.getElementById('releaseFundsBtn');
 if (releaseFundsBtn) {
   releaseFundsBtn.addEventListener('click', releaseFunds);
@@ -1080,46 +794,33 @@ if (depositFundsBtn) {
   depositFundsBtn.addEventListener('click', depositFunds);
 }
 
-// --- New Code for Mutual Agreement with Dispute Resolution ---
-
-// Freelancer marks the project as ready for review
-async function markReadyForReview() {
-  const projectId = prompt('Enter the project ID to mark as ready for review:');
-  if (!projectId || isNaN(projectId)) {
-    alert('Invalid input. Please enter a valid project ID.');
+async function submitWork() {
+  const projectId = prompt('Enter the project ID to submit work:');
+  const workCid = prompt('Enter the IPFS CID of your submitted work:');
+  if (!projectId || isNaN(projectId) || !workCid) {
+    alert('Invalid input. Please enter a valid project ID and IPFS CID.');
     return;
   }
 
   try {
     const project = await contract.methods.projects(projectId).call();
     if (project.freelancer.toLowerCase() !== userAccount.toLowerCase()) {
-      alert('Only the assigned freelancer can mark the project as ready for review!');
-      return;
-    }
-    if (project.isPaid) {
-      alert('Funds have already been released for this project!');
+      alert('Only the assigned freelancer can submit work!');
       return;
     }
 
-    const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 0) { // 0 is Active
-      alert('Project is not in active state!');
-      return;
-    }
-
-    const receipt = await contract.methods.markReadyForReview(projectId).send({ from: userAccount });
-    console.log('Marked Ready for Review:', receipt);
-    alert(`Project ID ${projectId} marked as ready for review! Employer has 7 days to respond.`);
-    fetchProjects();
+    const receipt = await contract.methods.submitWork(projectId, workCid).send({ from: userAccount });
+    console.log('Work Submitted:', receipt);
+    alert(`Work submitted successfully for Project ID: ${projectId}`);
+    fetchProjectsWithSubmissions();
   } catch (error) {
-    console.error('Error marking project as ready for review:', error);
-    alert(`Failed to mark project as ready for review: ${error.message}`);
+    console.error('Error submitting work:', error);
+    alert('Failed to submit work. Check the console for details.');
   }
 }
 
-// Employer approves the project
-async function approveProject() {
-  const projectId = prompt('Enter the project ID to approve:');
+async function approveSubmission() {
+  const projectId = prompt('Enter the project ID to approve submission:');
   if (!projectId || isNaN(projectId)) {
     alert('Invalid input. Please enter a valid project ID.');
     return;
@@ -1128,68 +829,99 @@ async function approveProject() {
   try {
     const project = await contract.methods.projects(projectId).call();
     if (project.employer.toLowerCase() !== userAccount.toLowerCase()) {
-      alert('Only the employer can approve the project!');
-      return;
-    }
-    if (project.isPaid) {
-      alert('Funds have already been released for this project!');
+      alert('Only the employer can approve the submission!');
       return;
     }
 
-    const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 1 && reviewStatus.state != 3) { // 1 is ReadyForReview, 3 is Resubmitted
-      alert('Project is not ready for review or resubmitted!');
-      return;
-    }
-
-    const receipt = await contract.methods.approveProject(projectId).send({ from: userAccount });
-    console.log('Project Approved:', receipt);
-    alert(`Project ID ${projectId} approved! Funds released to freelancer.`);
-    fetchProjects();
+    const receipt = await contract.methods.approveSubmission(projectId).send({ from: userAccount });
+    console.log('Submission Approved:', receipt);
+    alert(`Submission approved for Project ID: ${projectId}`);
+    fetchProjectsWithSubmissions();
   } catch (error) {
-    console.error('Error approving project:', error);
-    alert(`Failed to approve project: ${error.message}`);
+    console.error('Error approving submission:', error);
+    alert('Failed to approve submission. Check the console for details.');
   }
 }
 
-// Employer disputes the project
-async function disputeProject() {
-  const projectId = prompt('Enter the project ID to dispute:');
-  if (!projectId || isNaN(projectId)) {
-    alert('Invalid input. Please enter a valid project ID.');
+async function disputeSubmission() {
+  const projectId = prompt('Enter the project ID to dispute submission:');
+  const reason = prompt('Enter the reason for disputing the submission:');
+  const evidenceCid = prompt('Enter the IPFS CID of your evidence:');
+  if (!projectId || isNaN(projectId) || !reason || !evidenceCid) {
+    alert('Invalid input. Please enter a valid project ID, reason, and IPFS CID.');
     return;
   }
 
   try {
     const project = await contract.methods.projects(projectId).call();
     if (project.employer.toLowerCase() !== userAccount.toLowerCase()) {
-      alert('Only the employer can dispute the project!');
-      return;
-    }
-    if (project.isPaid) {
-      alert('Funds have already been released for this project!');
+      alert('Only the employer can dispute the submission!');
       return;
     }
 
-    const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 1 && reviewStatus.state != 3) { // 1 is ReadyForReview, 3 is Resubmitted
-      alert('Project is not ready for dispute!');
-      return;
-    }
-
-    const receipt = await contract.methods.disputeProject(projectId).send({ from: userAccount });
-    console.log('Project Disputed:', receipt);
-    alert(`Project ID ${projectId} disputed! Freelancer has 3 days to resubmit.`);
-    fetchProjects();
+    const receipt = await contract.methods.disputeSubmission(projectId, reason, evidenceCid).send({ from: userAccount });
+    console.log('Submission Disputed:', receipt);
+    alert(`Submission disputed for Project ID: ${projectId}`);
+    fetchProjectsWithSubmissions();
   } catch (error) {
-    console.error('Error disputing project:', error);
-    alert(`Failed to dispute project: ${error.message}`);
+    console.error('Error disputing submission:', error);
+    alert('Failed to dispute submission. Check the console for details.');
   }
 }
 
-// Freelancer resubmits the project
-async function resubmitProject() {
-  const projectId = prompt('Enter the project ID to resubmit:');
+async function submitDisputeEvidence() {
+  const projectId = prompt('Enter the project ID to submit dispute evidence:');
+  const evidenceCid = prompt('Enter the IPFS CID of your evidence:');
+  if (!projectId || isNaN(projectId) || !evidenceCid) {
+    alert('Invalid input. Please enter a valid project ID and IPFS CID.');
+    return;
+  }
+
+  try {
+    const project = await contract.methods.projects(projectId).call();
+    if (project.freelancer.toLowerCase() !== userAccount.toLowerCase()) {
+      alert('Only the freelancer can submit dispute evidence!');
+      return;
+    }
+
+    const receipt = await contract.methods.submitDisputeEvidence(projectId, evidenceCid).send({ from: userAccount });
+    console.log('Dispute Evidence Submitted:', receipt);
+    alert(`Dispute evidence submitted for Project ID: ${projectId}`);
+    fetchProjectsWithSubmissions();
+  } catch (error) {
+    console.error('Error submitting dispute evidence:', error);
+    alert('Failed to submit dispute evidence. Check the console for details.');
+  }
+}
+
+async function resolveDispute() {
+  const projectId = prompt('Enter the project ID to resolve dispute:');
+  const freelancerWins = confirm('Does the freelancer win the dispute? (OK for Yes, Cancel for No)');
+  const reason = prompt('Enter the reason for your decision:');
+  if (!projectId || isNaN(projectId) || !reason) {
+    alert('Invalid input. Please enter a valid project ID and reason.');
+    return;
+  }
+
+  try {
+    const owner = await contract.methods.owner().call();
+    if (userAccount.toLowerCase() !== owner.toLowerCase()) {
+      alert('Only the contract owner can resolve disputes!');
+      return;
+    }
+
+    const receipt = await contract.methods.resolveDispute(projectId, freelancerWins, reason).send({ from: userAccount });
+    console.log('Dispute Resolved:', receipt);
+    alert(`Dispute resolved for Project ID: ${projectId}`);
+    fetchProjectsWithSubmissions();
+  } catch (error) {
+    console.error('Error resolving dispute:', error);
+    alert('Failed to resolve dispute. Check the console for details.');
+  }
+}
+
+async function claimFunds() {
+  const projectId = prompt('Enter the project ID to claim funds:');
   if (!projectId || isNaN(projectId)) {
     alert('Invalid input. Please enter a valid project ID.');
     return;
@@ -1198,91 +930,116 @@ async function resubmitProject() {
   try {
     const project = await contract.methods.projects(projectId).call();
     if (project.freelancer.toLowerCase() !== userAccount.toLowerCase()) {
-      alert('Only the assigned freelancer can resubmit the project!');
-      return;
-    }
-    if (project.isPaid) {
-      alert('Funds have already been released for this project!');
+      alert('Only the freelancer can claim funds!');
       return;
     }
 
-    const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state != 2) { // 2 is Disputed
-      alert('Project is not in disputed state!');
-      return;
-    }
-
-    const deadline = parseInt(reviewStatus.disputeTimestamp) + (3 * 24 * 60 * 60); // 3 days in seconds
-    if (Math.floor(Date.now() / 1000) > deadline) {
-      alert('Resubmission deadline has passed!');
-      return;
-    }
-
-    const receipt = await contract.methods.resubmitProject(projectId).send({ from: userAccount });
-    console.log('Project Resubmitted:', receipt);
-    alert(`Project ID ${projectId} resubmitted! Employer has 3 days to review.`);
-    fetchProjects();
+    const receipt = await contract.methods.claimFunds(projectId).send({ from: userAccount });
+    console.log('Funds Claimed:', receipt);
+    alert(`Funds claimed successfully for Project ID: ${projectId}`);
+    fetchProjectsWithSubmissions();
   } catch (error) {
-    console.error('Error resubmitting project:', error);
-    alert(`Failed to resubmit project: ${error.message}`);
+    console.error('Error claiming funds:', error);
+    alert('Failed to claim funds. Check the console for details.');
   }
 }
 
-// Check deadlines for auto-release or fund splitting
-async function checkDeadlines() {
-  const projectId = prompt('Enter the project ID to check deadlines:');
-  if (!projectId || isNaN(projectId)) {
-    alert('Invalid input. Please enter a valid project ID.');
-    return;
-  }
-
+async function fetchProjects() {
   try {
-    const project = await contract.methods.projects(projectId).call();
-    if (project.isPaid) {
-      alert('Funds have already been released for this project!');
+    console.log('Fetching project count...');
+    const projectCount = await contract.methods.projectCount().call();
+    console.log(`Project count: ${projectCount}`);
+
+    projectTable.innerHTML = '';
+    if (projectCount === 0) {
+      projectTable.innerHTML = '<tr><td colspan="9">No projects found.</td></tr>';
       return;
     }
 
-    const reviewStatus = await contract.methods.reviewStatuses(projectId).call();
-    if (reviewStatus.state == 0 || reviewStatus.state == 4) { // 0 is Active, 4 is Completed
-      alert('Project is not in a review state!');
-      return;
-    }
+    for (let i = 1; i <= projectCount; i++) {
+      console.log(`Fetching project ${i}...`);
+      const project = await contract.methods.projects(i).call();
+      const submission = await contract.methods.submissions(i).call();
+      console.log(`Project ${i} details:`, project);
+      console.log(`Submission ${i} details:`, submission);
 
-    const receipt = await contract.methods.checkDeadlines(projectId).send({ from: userAccount });
-    console.log('Deadlines Checked:', receipt);
-    alert(`Deadlines checked for Project ID ${projectId}. Check project status.`);
-    fetchProjects();
+      let applicantsHtml = '';
+      try {
+        const proposals = await contract.methods.feeProposals(i).call();
+        console.log(`Proposals for project ${i}:`, proposals);
+        if (proposals.length > 0) {
+          for (let j = 0; j < proposals.length; j++) {
+            const freelancer = proposals[j].freelancer;
+            const proposedFee = web3.utils.fromWei(proposals[j].proposedFee, 'ether');
+            const reputation = await contract.methods.getFreelancerReputation(freelancer).call();
+            applicantsHtml += `Freelancer: ${freelancer}, Fee: ${proposedFee} ETH, Reputation: ${web3.utils.fromWei(reputation, 'ether')} REP<br>`;
+          }
+        } else {
+          applicantsHtml = 'No applicants yet';
+        }
+      } catch (proposalError) {
+        console.error(`Error fetching proposals for project ${i}:`, proposalError);
+        applicantsHtml = 'Error fetching applicants';
+      }
+
+      // Map submission status to readable text
+      let submissionStatus = 'Not Submitted';
+      switch (parseInt(submission.status)) {
+        case 0: submissionStatus = 'Not Submitted'; break;
+        case 1: submissionStatus = 'Submitted'; break;
+        case 2: submissionStatus = 'Disputed'; break;
+        case 3: submissionStatus = 'Approved'; break;
+        case 4: submissionStatus = 'Rejected'; break;
+      }
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${project.id}</td>
+        <td>${project.name}</td>
+        <td>${project.description}</td>
+        <td>${project.employer}</td>
+        <td>${project.freelancer || 'N/A'}</td>
+        <td>${project.bidAmount ? web3.utils.fromWei(project.bidAmount, 'ether') : 'N/A'} ETH</td>
+        <td>${project.completed ? 'Yes' : 'No'}</td>
+        <td>${applicantsHtml}</td>
+        <td>${submissionStatus}</td>
+      `;
+      projectTable.appendChild(row);
+    }
   } catch (error) {
-    console.error('Error checking deadlines:', error);
-    alert(`Failed to check deadlines: ${error.message}`);
+    console.error('Error fetching projects:', error);
+    alert('Failed to fetch projects. Check the console for details.');
   }
 }
 
-// Add event listeners for new buttons
-const markReadyBtn = document.getElementById('markReadyBtn');
-if (markReadyBtn) {
-  markReadyBtn.addEventListener('click', markReadyForReview);
+const submitWorkBtn = document.getElementById('submitWorkBtn');
+if (submitWorkBtn) {
+  submitWorkBtn.addEventListener('click', submitWork);
 }
 
-const approveBtn = document.getElementById('approveBtn');
-if (approveBtn) {
-  approveBtn.addEventListener('click', approveProject);
+const approveSubmissionBtn = document.getElementById('approveSubmissionBtn');
+if (approveSubmissionBtn) {
+  approveSubmissionBtn.addEventListener('click', approveSubmission);
 }
 
-const disputeBtn = document.getElementById('disputeBtn');
-if (disputeBtn) {
-  disputeBtn.addEventListener('click', disputeProject);
+const disputeSubmissionBtn = document.getElementById('disputeSubmissionBtn');
+if (disputeSubmissionBtn) {
+  disputeSubmissionBtn.addEventListener('click', disputeSubmission);
 }
 
-const resubmitBtn = document.getElementById('resubmitBtn');
-if (resubmitBtn) {
-  resubmitBtn.addEventListener('click', resubmitProject);
+const submitDisputeEvidenceBtn = document.getElementById('submitDisputeEvidenceBtn');
+if (submitDisputeEvidenceBtn) {
+  submitDisputeEvidenceBtn.addEventListener('click', submitDisputeEvidence);
 }
 
-const checkDeadlinesBtn = document.getElementById('checkDeadlinesBtn');
-if (checkDeadlinesBtn) {
-  checkDeadlinesBtn.addEventListener('click', checkDeadlines);
+const resolveDisputeBtn = document.getElementById('resolveDisputeBtn');
+if (resolveDisputeBtn) {
+  resolveDisputeBtn.addEventListener('click', resolveDispute);
+}
+
+const claimFundsBtn = document.getElementById('claimFundsBtn');
+if (claimFundsBtn) {
+  claimFundsBtn.addEventListener('click', claimFunds);
 }
 
 createProjectBtn.addEventListener('click', createProject);

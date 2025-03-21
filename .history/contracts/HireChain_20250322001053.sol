@@ -18,6 +18,9 @@ contract HireChain {
         uint256 bidAmount;
         bool completed;
         bool isPaid;
+        // New fields for IPFS CIDs
+        string employerFileCID;  // CID of the employer's file (set during project creation)
+        string freelancerFileCID; // CID of the freelancer's file (set during markReadyForReview/resubmitProject)
     }
 
     struct Freelancer {
@@ -51,7 +54,7 @@ contract HireChain {
 
     function createProject(string memory _name, string memory _description) public {
         projectCount++;
-        projects[projectCount] = Project(projectCount, _name, _description, msg.sender, address(0), 0, false, false);
+        projects[projectCount] = Project(projectCount, _name, _description, msg.sender, address(0), 0, false, false, "", "");
         emit ProjectCreated(projectCount, _name, _description, msg.sender);
     }
 
@@ -154,28 +157,23 @@ contract HireChain {
 
     receive() external payable {}
 
-    // --- New Code for Mutual Agreement with Dispute Resolution ---
+    // --- Existing Code for Mutual Agreement with Dispute Resolution ---
 
-    // Enum to track the project's review and dispute state
     enum ProjectState { Active, ReadyForReview, Disputed, Resubmitted, Completed }
 
-    // Struct to store review and dispute information for each project
     struct ReviewStatus {
         ProjectState state;
-        uint256 readyForReviewTimestamp; // When freelancer marked as ready
-        uint256 disputeTimestamp;        // When employer disputed
-        bool employerApproved;           // Whether employer has approved
+        uint256 readyForReviewTimestamp;
+        uint256 disputeTimestamp;
+        bool employerApproved;
     }
 
-    // Mapping to store review status for each project
     mapping(uint256 => ReviewStatus) public reviewStatuses;
 
-    // Constants for deadlines (in seconds)
-    uint256 public constant EMPLOYER_REVIEW_DEADLINE = 7 days;  // 7 days for employer to review
-    uint256 public constant FREELANCER_RESUBMIT_DEADLINE = 3 days; // 3 days for freelancer to resubmit
-    uint256 public constant EMPLOYER_REDISPUTE_DEADLINE = 3 days; // 3 days for employer to review resubmission
+    uint256 public constant EMPLOYER_REVIEW_DEADLINE = 7 days;
+    uint256 public constant FREELANCER_RESUBMIT_DEADLINE = 3 days;
+    uint256 public constant EMPLOYER_REDISPUTE_DEADLINE = 3 days;
 
-    // Events for the new system
     event ProjectMarkedReadyForReview(uint256 projectId, address freelancer, uint256 timestamp);
     event ProjectApproved(uint256 projectId, address employer);
     event ProjectDisputed(uint256 projectId, address employer, uint256 timestamp);
@@ -183,7 +181,6 @@ contract HireChain {
     event FundsAutoReleased(uint256 projectId, address freelancer, uint256 amount);
     event FundsSplit(uint256 projectId, uint256 employerAmount, uint256 freelancerAmount);
 
-    // Freelancer marks the project as ready for review
     function markReadyForReview(uint256 _projectId) public {
         Project storage project = projects[_projectId];
         ReviewStatus storage review = reviewStatuses[_projectId];
@@ -198,7 +195,6 @@ contract HireChain {
         emit ProjectMarkedReadyForReview(_projectId, msg.sender, block.timestamp);
     }
 
-    // Employer approves the project, releasing funds
     function approveProject(uint256 _projectId) public {
         Project storage project = projects[_projectId];
         ReviewStatus storage review = reviewStatuses[_projectId];
@@ -207,17 +203,14 @@ contract HireChain {
         require(review.state == ProjectState.ReadyForReview || review.state == ProjectState.Resubmitted, "Project not ready for review");
         require(!project.isPaid, "Funds already released");
 
-        // Mark as completed and approved
         project.completed = true;
         review.state = ProjectState.Completed;
         review.employerApproved = true;
 
-        // Release funds to freelancer
         releaseFundsToFreelancer(_projectId);
         emit ProjectApproved(_projectId, msg.sender);
     }
 
-    // Employer disputes the project
     function disputeProject(uint256 _projectId) public {
         Project storage project = projects[_projectId];
         ReviewStatus storage review = reviewStatuses[_projectId];
@@ -231,7 +224,6 @@ contract HireChain {
         emit ProjectDisputed(_projectId, msg.sender, block.timestamp);
     }
 
-    // Freelancer resubmits the project after a dispute
     function resubmitProject(uint256 _projectId) public {
         Project storage project = projects[_projectId];
         ReviewStatus storage review = reviewStatuses[_projectId];
@@ -245,7 +237,6 @@ contract HireChain {
         emit ProjectResubmitted(_projectId, msg.sender, block.timestamp);
     }
 
-    // Employer or freelancer can check and trigger auto-release or split if deadlines are missed
     function checkDeadlines(uint256 _projectId) public {
         Project storage project = projects[_projectId];
         ReviewStatus storage review = reviewStatuses[_projectId];
@@ -253,7 +244,6 @@ contract HireChain {
         require(!project.isPaid, "Funds already released");
         require(review.state != ProjectState.Active && review.state != ProjectState.Completed, "Project not in a review state");
 
-        // Check if employer missed the review deadline
         if (review.state == ProjectState.ReadyForReview &&
             block.timestamp > review.readyForReviewTimestamp + EMPLOYER_REVIEW_DEADLINE) {
             project.completed = true;
@@ -263,14 +253,12 @@ contract HireChain {
             return;
         }
 
-        // Check if freelancer missed the resubmission deadline
         if (review.state == ProjectState.Disputed &&
             block.timestamp > review.disputeTimestamp + FREELANCER_RESUBMIT_DEADLINE) {
             splitFunds(_projectId);
             return;
         }
 
-        // Check if employer missed the re-dispute deadline after resubmission
         if (review.state == ProjectState.Resubmitted &&
             block.timestamp > review.readyForReviewTimestamp + EMPLOYER_REDISPUTE_DEADLINE) {
             project.completed = true;
@@ -280,7 +268,6 @@ contract HireChain {
             return;
         }
 
-        // Check if employer disputed again after resubmission
         if (review.state == ProjectState.Disputed &&
             review.disputeTimestamp > review.readyForReviewTimestamp) {
             splitFunds(_projectId);
@@ -288,7 +275,6 @@ contract HireChain {
         }
     }
 
-    // Helper function to release funds to freelancer
     function releaseFundsToFreelancer(uint256 _projectId) internal {
         Project storage project = projects[_projectId];
         require(address(this).balance >= project.bidAmount, "Insufficient contract balance");
@@ -303,21 +289,18 @@ contract HireChain {
         }
     }
 
-    // Helper function to split funds 50/50
     function splitFunds(uint256 _projectId) internal {
         Project storage project = projects[_projectId];
         require(address(this).balance >= project.bidAmount, "Insufficient contract balance");
 
         uint256 halfAmount = project.bidAmount / 2;
 
-        // Send half to freelancer
         (bool sentFreelancer, ) = project.freelancer.call{value: halfAmount, gas: 50000}("");
         if (!sentFreelancer) {
             emit TransferFailed(_projectId, "Transfer to freelancer failed in split");
             revert("Failed to send Ether to freelancer in split");
         }
 
-        // Send half to employer
         (bool sentEmployer, ) = project.employer.call{value: halfAmount, gas: 50000}("");
         if (!sentEmployer) {
             emit TransferFailed(_projectId, "Transfer to employer failed in split");
@@ -326,5 +309,58 @@ contract HireChain {
 
         project.isPaid = true;
         emit FundsSplit(_projectId, halfAmount, halfAmount);
+    }
+
+    // --- New Code for IPFS File Sharing ---
+
+    // Events for file uploads
+    event EmployerFileUploaded(uint256 projectId, string cid);
+    event FreelancerFileUploaded(uint256 projectId, string cid);
+
+    // Modified createProject to accept and store the employer's file CID
+    function createProjectWithFile(string memory _name, string memory _description, string memory _employerFileCID) public {
+        projectCount++;
+        projects[projectCount] = Project(projectCount, _name, _description, msg.sender, address(0), 0, false, false, _employerFileCID, "");
+        emit ProjectCreated(projectCount, _name, _description, msg.sender);
+        if (bytes(_employerFileCID).length > 0) {
+            emit EmployerFileUploaded(projectCount, _employerFileCID);
+        }
+    }
+
+    // Modified markReadyForReview to accept and store the freelancer's file CID
+    function markReadyForReviewWithFile(uint256 _projectId, string memory _freelancerFileCID) public {
+        Project storage project = projects[_projectId];
+        ReviewStatus storage review = reviewStatuses[_projectId];
+
+        require(msg.sender == project.freelancer, "Only the assigned freelancer can mark as ready");
+        require(project.freelancer != address(0), "No freelancer assigned");
+        require(!project.isPaid, "Funds already released");
+        require(review.state == ProjectState.Active, "Project is not in active state");
+
+        project.freelancerFileCID = _freelancerFileCID;
+        review.state = ProjectState.ReadyForReview;
+        review.readyForReviewTimestamp = block.timestamp;
+        emit ProjectMarkedReadyForReview(_projectId, msg.sender, block.timestamp);
+        if (bytes(_freelancerFileCID).length > 0) {
+            emit FreelancerFileUploaded(_projectId, _freelancerFileCID);
+        }
+    }
+
+    // Modified resubmitProject to accept and update the freelancer's file CID
+    function resubmitProjectWithFile(uint256 _projectId, string memory _freelancerFileCID) public {
+        Project storage project = projects[_projectId];
+        ReviewStatus storage review = reviewStatuses[_projectId];
+
+        require(msg.sender == project.freelancer, "Only the assigned freelancer can resubmit");
+        require(review.state == ProjectState.Disputed, "Project not in disputed state");
+        require(!project.isPaid, "Funds already released");
+        require(block.timestamp <= review.disputeTimestamp + FREELANCER_RESUBMIT_DEADLINE, "Resubmission deadline passed");
+
+        project.freelancerFileCID = _freelancerFileCID;
+        review.state = ProjectState.Resubmitted;
+        emit ProjectResubmitted(_projectId, msg.sender, block.timestamp);
+        if (bytes(_freelancerFileCID).length > 0) {
+            emit FreelancerFileUploaded(_projectId, _freelancerFileCID);
+        }
     }
 }
