@@ -943,7 +943,50 @@ async function fetchFreelancers() {
   }
 }
 
+// async function createProject() {
+//   const name = prompt('Enter the project name:');
+//   const description = prompt('Enter the project description:');
+//   if (!name || !description) {
+//     alert('Project name and description are required.');
+//     return;
+//   }
+
+//   let employerFileCID = '';
+//   const fileInput = document.createElement('input');
+//   fileInput.type = 'file';
+//   fileInput.accept = '.pdf,.zip,.doc,.docx'; // Restrict file types if needed
+//   fileInput.onchange = async (event) => {
+//     const file = event.target.files[0];
+//     if (file) {
+//       try {
+//         employerFileCID = await uploadFileToIPFS(file);
+//         alert('File uploaded to IPFS successfully! CID: ' + employerFileCID);
+//       } catch (error) {
+//         alert(error.message);
+//         return;
+//       }
+//     }
+
+//     try {
+//       const receipt = await contract.methods.createProject(name, description, employerFileCID).send({ from: userAccount });
+//       console.log('Project Created:', receipt);
+//       alert('Project created successfully!');
+//       fetchProjects();
+//     } catch (error) {
+//       console.error('Error creating project:', error);
+//       alert(`Failed to create project: ${error.message}`);
+//     }
+//   };
+//   fileInput.click();
+// }
+
 async function createProject() {
+  // Ensure userAccount is defined
+  if (!userAccount) {
+    alert('Please connect your wallet via MetaMask.');
+    return;
+  }
+
   const name = prompt('Enter the project name:');
   const description = prompt('Enter the project description:');
   if (!name || !description) {
@@ -954,33 +997,51 @@ async function createProject() {
   let employerFileCID = '';
   const fileInput = document.createElement('input');
   fileInput.type = 'file';
-  fileInput.accept = '.pdf,.zip,.doc,.docx'; // Restrict file types if needed
-  fileInput.onchange = async (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      try {
-        employerFileCID = await uploadFileToIPFS(file);
-        alert('File uploaded to IPFS successfully! CID: ' + employerFileCID);
-      } catch (error) {
-        alert(error.message);
-        return;
-      }
-    }
+  fileInput.accept = '.pdf,.zip,.doc,.docx';
 
-    try {
-      const receipt = await contract.methods.createProject(name, description, employerFileCID).send({ from: userAccount });
-      console.log('Project Created:', receipt);
-      alert('Project created successfully!');
-      fetchProjects();
-    } catch (error) {
-      console.error('Error creating project:', error);
+  const uploadPromise = new Promise((resolve) => {
+    fileInput.onchange = async (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        try {
+          employerFileCID = await uploadFileToIPFS(file);
+          alert('File uploaded to IPFS successfully! CID: ' + employerFileCID);
+        } catch (error) {
+          console.error('Error uploading file to IPFS:', error);
+          alert('File upload failed, proceeding without file: ' + error.message);
+        }
+      }
+      resolve();
+    };
+
+    // Handle cancellation of file selection
+    fileInput.addEventListener('cancel', () => {
+      resolve();
+    });
+  });
+
+  fileInput.click();
+  await uploadPromise; // Wait for file selection or cancellation
+
+  try {
+    const receipt = await contract.methods.createProject(name, description, employerFileCID).send({
+      from: userAccount,
+      gas: 3000000 // Specify gas limit to avoid "out of gas" errors
+    });
+    console.log('Project Created:', receipt);
+    alert('Project created successfully!');
+    fetchProjects();
+  } catch (error) {
+    console.error('Error creating project:', error);
+    if (error.message.includes('User denied transaction')) {
+      alert('Transaction rejected in MetaMask. Please approve the transaction to create the project.');
+    } else if (error.message.includes('revert')) {
+      alert('Transaction failed: Ensure all conditions are met (e.g., name and description are non-empty).');
+    } else {
       alert(`Failed to create project: ${error.message}`);
     }
-  };
-  fileInput.click();
+  }
 }
-
-
 
 async function applyForProject() {
   const projectId = prompt('Enter the project ID to apply:');

@@ -943,41 +943,94 @@ async function fetchFreelancers() {
   }
 }
 
+// async function createProject() {
+//   const name = prompt('Enter the project name:');
+//   const description = prompt('Enter the project description:');
+//   if (!name || !description) {
+//     alert('Project name and description are required.');
+//     return;
+//   }
+
+//   let employerFileCID = '';
+//   const fileInput = document.createElement('input');
+//   fileInput.type = 'file';
+//   fileInput.accept = '.pdf,.zip,.doc,.docx'; // Restrict file types if needed
+//   fileInput.onchange = async (event) => {
+//     const file = event.target.files[0];
+//     if (file) {
+//       try {
+//         employerFileCID = await uploadFileToIPFS(file);
+//         alert('File uploaded to IPFS successfully! CID: ' + employerFileCID);
+//       } catch (error) {
+//         alert(error.message);
+//         return;
+//       }
+//     }
+
+//     try {
+//       const receipt = await contract.methods.createProject(name, description, employerFileCID).send({ from: userAccount });
+//       console.log('Project Created:', receipt);
+//       alert('Project created successfully!');
+//       fetchProjects();
+//     } catch (error) {
+//       console.error('Error creating project:', error);
+//       alert(`Failed to create project: ${error.message}`);
+//     }
+//   };
+//   fileInput.click();
+// }
 async function createProject() {
   const name = prompt('Enter the project name:');
   const description = prompt('Enter the project description:');
+
   if (!name || !description) {
     alert('Project name and description are required.');
     return;
   }
 
-  let employerFileCID = '';
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.accept = '.pdf,.zip,.doc,.docx'; // Restrict file types if needed
-  fileInput.onchange = async (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      try {
-        employerFileCID = await uploadFileToIPFS(file);
-        alert('File uploaded to IPFS successfully! CID: ' + employerFileCID);
-      } catch (error) {
-        alert(error.message);
-        return;
-      }
-    }
+  // Open file browser and wait for user to select a file
+  const file = await selectFile(['.pdf', '.zip', '.doc', '.docx']);
+  if (!file) {
+    alert('No file selected.');
+    return;
+  }
 
-    try {
-      const receipt = await contract.methods.createProject(name, description, employerFileCID).send({ from: userAccount });
-      console.log('Project Created:', receipt);
-      alert('Project created successfully!');
-      fetchProjects();
-    } catch (error) {
-      console.error('Error creating project:', error);
-      alert(`Failed to create project: ${error.message}`);
+  try {
+    const employerFileCID = await uploadFileToIPFS(file);
+    alert('File uploaded to IPFS successfully! CID: ' + employerFileCID);
+
+    const receipt = await contract.methods.createProject(name, description, employerFileCID).send({ from: userAccount });
+    console.log('Project Created:', receipt);
+    alert('Project created successfully!');
+    fetchProjects();
+  } catch (error) {
+    console.error('Error creating project:', error);
+    alert(`Failed to create project: ${error.message}`);
+  }
+}
+
+// Helper to open file browser and wait for user selection
+function selectFile(acceptedTypes = []) {
+  return new Promise((resolve) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    if (acceptedTypes.length) {
+      input.accept = acceptedTypes.join(',');
     }
-  };
-  fileInput.click();
+    input.style.display = 'none';
+
+    input.onchange = () => {
+      resolve(input.files[0] || null);
+    };
+
+    document.body.appendChild(input);
+    input.click();
+
+    // Optional: cleanup after file selection
+    input.addEventListener('blur', () => {
+      document.body.removeChild(input);
+    });
+  });
 }
 
 

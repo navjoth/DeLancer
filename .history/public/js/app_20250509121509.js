@@ -943,7 +943,7 @@ async function fetchFreelancers() {
   }
 }
 
-async function createProject() {
+ function createProject() {
   const name = prompt('Enter the project name:');
   const description = prompt('Enter the project description:');
   if (!name || !description) {
