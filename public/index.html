@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeLancer</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.1/dist/web3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="particles-js" class="background-particles"></div>
+
+    <header class="hero">
+        <img src="logo.png" alt="DeLancer Logo" class="logo" style="width: 200px; height: auto;">   
+        <!-- <h1 class="animated-title">DeLancer</h1> -->
+        <h2><div id="userAccount" class="wallet-display">Connecting...</div></h2>
+    </header>
+
+    <main>
+        <!-- Action Buttons Section -->
+        <section class="action-section">
+            <div class="action-group">
+                <h2>Project Actions</h2>
+                <!-- Add the Create Project Form Here -->
+                <div class="create-project-form-container">
+                    <form id="createProjectForm">
+                        <div class="form-group">
+                            <label for="projectName">Project Name:</label>
+                            <input type="text" id="projectName" required placeholder="Enter project name">
+                        </div>
+                        <div class="form-group">
+                            <label for="projectDescription">Description:</label>
+                            <textarea id="projectDescription" required placeholder="Enter project description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="requiredSkills">Required Skills (comma-separated):</label>
+                            <input type="text" id="requiredSkills" placeholder="e.g., Solidity,JavaScript,UI/UX">
+                        </div>
+                        <div class="form-group">
+                            <label for="employerFile">Employer File (optional):</label>
+                            <input type="file" id="employerFile" accept=".pdf,.zip,.doc,.docx">
+                        </div>
+                        <button type="submit" class="action-btn">Create Project</button>
+                    </form>
+                </div>
+
+                <!-- Remaining Project Action Buttons -->
+                <div class="button-grid">
+                    <button id="applyProjectBtn">Apply for Project</button>
+                    <button id="assignFreelancerBtn">Assign Freelancer</button>
+                    <button id="depositFundsBtn">Deposit Funds</button>
+                    <button id="completeProjectBtn">Complete Project</button>
+                    <button id="releaseFundsBtn">Release Funds</button>
+                </div>
+            </div>
+
+            <div class="action-group">
+                <h2>Review Actions</h2>
+                <div class="button-grid">
+                    <button id="markReadyBtn">Mark Ready for Review</button>
+                    <button id="approveBtn">Approve Project</button>
+                    <button id="disputeBtn">Dispute Project</button>
+                    <button id="resubmitBtn">Resubmit Project</button>
+                    <!-- <button id="checkDeadlinesBtn">Check Deadlines</button> -->
+                </div>
+            </div>
+
+            <div class="action-group">
+                <h2>Data Fetch</h2>
+                <div class="button-grid">
+                    <button id="fetchProjectsBtn">Fetch Projects</button>
+                    <!-- <button id="fetchFreelancersBtn">Fetch Freelancers</button> -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Available Projects Section -->
+        <section class="display-section">
+            <h2>Available Projects</h2>
+            <div id="projectTable" class="project-grid"></div>
+        </section>
+
+        <!-- Freelancers Section -->
+        <section class="freelancer-section">
+            <h2>Freelancers</h2>
+            <div id="freelancerTable" class="freelancer-grid"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2024 DeLancer | Built for Transparency and Trust</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Initialize Particles.js for background animation
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: ['#4a90e2', '#7f8c8d'] },
+                shape: { type: 'circle' },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: '#4a90e2', opacity: 0.4, width: 1 },
+                move: { enable: true, speed: 2, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
+                modes: { repulse: { distance: 100, duration: 0.4 }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
+        });
+
+        // Letter-by-letter animation for the title (if you decide to uncomment the title)
+        document.addEventListener('DOMContentLoaded', () => {
+            const title = document.querySelector('.animated-title');
+            if (title) {
+                const text = title.textContent;
+                title.innerHTML = '';
+                text.split('').forEach((char, index) => {
+                    const span = document.createElement('span');
+                    span.textContent = char;
+                    span.style.animationDelay = `${index * 0.1}s`;
+                    title.appendChild(span);
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
