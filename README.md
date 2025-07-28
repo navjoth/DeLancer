@@ -92,3 +92,23 @@ Interact with the DApp via MetaMask.
 
 Make sure MetaMask is unlocked and connected to the local Ganache network.
 
+##  Demo Images
+
+### Home Page  
+![Home](./screenshots/pic1.jpg)
+
+### Available projects  
+![Available projects](./screenshots/pic3.jpg)
+
+### Metamask Wallet  
+![Metamask Wallet](./screenshots/pic4.jpg)
+
+### Transaction request  
+![Transaction request](./screenshots/pic2.jpg)
+
+### Transactions  
+![Transactions](./screenshots/pic5.jpg)
+
+### Ganache  
+![Ganache](./screenshots/pic6.jpg)
+
